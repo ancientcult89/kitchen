@@ -1,12 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
-using System.Diagnostics.CodeAnalysis;
+using Primitives;
 
 namespace Items.Core.Domain.Model.ItemAgregate
 {
-    [ExcludeFromCodeCoverage]
     public class MeasureType : ValueObject
     {
-        //название меры измерения
+        //Название меры измерения
         public string Name { get; private set; }
 
         /// <summary>
@@ -24,9 +23,29 @@ namespace Items.Core.Domain.Model.ItemAgregate
             Name = name;
         }
 
+        public static Result<MeasureType, Error> CreateFromString(string measureTypeName)
+        {
+            if (string.IsNullOrWhiteSpace(measureTypeName))
+                return new Error("measure.type.cannot.be.empty", "Measure type name cannot be empty");
+
+            var normalizedName = measureTypeName.Trim().ToLowerInvariant();
+
+            return normalizedName switch
+            {
+                "weight" => MeasureType.Weight,
+                "liquid" => MeasureType.Liquid,
+                _ => new Error("unknown.measure.type", $"Unknown measure type: {normalizedName}")
+            };
+        }
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Name;
+            yield return Name.ToLowerInvariant();
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
         }
     }
 }

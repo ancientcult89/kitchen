@@ -3,7 +3,7 @@ using Items.Core.Domain.Model.ItemAgregate;
 
 namespace Items.UnitTests.Domain.Model
 {
-    public class ItemShould
+    public class ItemTests
     {
         [Fact]
         public void Create_WithValidParameters_ReturnsSuccessResult()

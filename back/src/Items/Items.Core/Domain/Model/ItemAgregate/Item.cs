@@ -4,7 +4,7 @@ using Primitives;
 namespace Items.Core.Domain.Model.ItemAgregate
 {
     /// <summary>
-    /// Позиция - продукт
+    /// Продуктовая единица
     /// </summary>
     public class Item : Aggregate<Guid>
     {

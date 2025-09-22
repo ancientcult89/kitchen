@@ -20,12 +20,17 @@ namespace Items.Infrastructure.Adapters.Postgres.Repositories
 
         public bool CheckDuplicate(AddItemCommand request)
         {
-            var isDuplicate = _dbContext.Items.Any(i => 
-                i.Name == request.Name 
-                && i.MeasureType.ToString() == request.MeasureType
-            );
+            // Сначала получаем все возможные MeasureType из базы
+            var existingMeasureTypes =  _dbContext.Items
+                .Where(i => i.Name == request.Name)
+                .Select(i => i.MeasureType.Name) // Получаем только Name MeasureType
+                .Distinct()
+                .ToList();
 
-            return isDuplicate;
+            // Затем сравниваем на клиенте
+            var normalizedRequestMeasureType = request.MeasureType.Trim().ToLowerInvariant();
+            return existingMeasureTypes.Any(mt =>
+                mt.ToLowerInvariant() == normalizedRequestMeasureType);
         }
 
         public async Task<Maybe<List<Item>>> GetAllAsync()

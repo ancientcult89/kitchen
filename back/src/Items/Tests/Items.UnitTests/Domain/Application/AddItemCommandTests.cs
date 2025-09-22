@@ -24,11 +24,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_ValidCommand_ShouldCreateItemAndReturnSuccess()
         {
             // Arrange
-            var command = new AddItemCommand
-            {
-                Name = "Test Item",
-                MeasureType = "weight"
-            };
+            var command = new AddItemCommand("Test Item","weight");
 
             _itemRepository.CheckDuplicate(Arg.Any<AddItemCommand>()).Returns(false);
 
@@ -45,11 +41,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_DuplicateItemExists_ShouldReturnError()
         {
             // Arrange
-            var command = new AddItemCommand
-            {
-                Name = "Test Item",
-                MeasureType = "weight"
-            };
+            var command = new AddItemCommand("Test Item", "weight");
 
             _itemRepository.CheckDuplicate(Arg.Any<AddItemCommand>()).Returns(true);
 
@@ -73,11 +65,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_InvalidMeasureType_ShouldReturnFailure(string invalidMeasureType)
         {
             // Arrange
-            var command = new AddItemCommand
-            {
-                Name = "Test Item",
-                MeasureType = invalidMeasureType
-            };
+            var command = new AddItemCommand("Test Item", invalidMeasureType);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -98,11 +86,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_ValidMeasureTypeCaseInsensitive_ShouldCreateItem(string validMeasureType)
         {
             // Arrange
-            var command = new AddItemCommand
-            {
-                Name = "Test Item",
-                MeasureType = validMeasureType
-            };
+            var command = new AddItemCommand("Test Item", validMeasureType);
 
             _itemRepository.CheckDuplicate(Arg.Any<AddItemCommand>()).Returns(false);
 
@@ -118,11 +102,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_ItemCreationFails_ShouldReturnError()
         {
             // Arrange
-            var command = new AddItemCommand
-            {
-                Name = "", // Invalid name that should cause Item.Create to fail
-                MeasureType = "weight"
-            };
+            var command = new AddItemCommand("", "weight");
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -137,11 +117,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
         {
             // Arrange
-            var command = new AddItemCommand
-            {
-                Name = "Test Item",
-                MeasureType = "weight"
-            };
+            var command = new AddItemCommand("Test Item", "weight");
 
             _itemRepository.CheckDuplicate(Arg.Any<AddItemCommand>()).Returns(false);
             _itemRepository.When(x => x.AddAsync(Arg.Any<Item>()))

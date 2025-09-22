@@ -17,6 +17,9 @@ namespace Items.Core.Application.UseCases.Query.GetAllItems
         {
             var result = await _itemRepository.GetAllAsync();
 
+            if (result.HasNoValue)
+                return null;
+
             if (result.Value.Count == 0)
                 return null;
 

@@ -35,6 +35,9 @@ namespace Items.Infrastructure.Adapters.Postgres.Repositories
 
         public async Task<Maybe<Item>> GetAsync(Guid itemId)
         {
+            if (itemId == Guid.Empty)
+                return null;
+
             var item = await _dbContext
                 .Items
                 .SingleOrDefaultAsync(i => i.Id == itemId);

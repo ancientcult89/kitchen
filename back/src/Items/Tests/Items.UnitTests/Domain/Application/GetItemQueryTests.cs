@@ -34,7 +34,7 @@ namespace Items.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -61,7 +61,7 @@ namespace Items.UnitTests.Domain.Application
 
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -80,7 +80,7 @@ namespace Items.UnitTests.Domain.Application
 
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -98,7 +98,7 @@ namespace Items.UnitTests.Domain.Application
             _mockRepository.GetAsync(itemId).Returns<Task<Maybe<Item>>>(x =>
                 throw new InvalidOperationException("Database error"));
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
 
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -157,7 +157,7 @@ namespace Items.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -178,7 +178,7 @@ namespace Items.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -199,7 +199,7 @@ namespace Items.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetItemQuery { ItemId = itemId };
+            var query = new GetItemQuery(itemId);
             var cancellationToken = new CancellationTokenSource().Token;
 
             // Act

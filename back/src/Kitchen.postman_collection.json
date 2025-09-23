@@ -9,56 +9,194 @@
 			"name": "Item",
 			"item": [
 				{
-					"name": "/health",
-					"protocolProfileBehavior": {
-						"strictSSL": false
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{item_http_host}}/health",
-							"host": [
-								"{{item_http_host}}"
-							],
-							"path": [
-								"health"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "items",
-					"protocolProfileBehavior": {
-						"strictSSL": false
-					},
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+					"name": "http",
+					"item": [
+						{
+							"name": "/health",
+							"protocolProfileBehavior": {
+								"strictSSL": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{item_http_host}}/health",
+									"host": [
+										"{{item_http_host}}"
+									],
+									"path": [
+										"health"
+									]
 								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{item_http_host}}/api/v1/items/",
-							"host": [
-								"{{item_http_host}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"items",
-								""
-							]
+						{
+							"name": "items (add item)",
+							"protocolProfileBehavior": {
+								"strictSSL": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{item_http_host}}/api/v1/items/",
+									"host": [
+										"{{item_http_host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"items",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "items (all)",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"strictSSL": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{item_http_host}}/api/v1/items/",
+									"host": [
+										"{{item_http_host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"items",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "items (by ID)",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"strictSSL": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{item_http_host}}/api/v1/items/71ced7d2-5451-4d86-b5a2-0694af4acb59/",
+									"host": [
+										"{{item_http_host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"items",
+										"71ced7d2-5451-4d86-b5a2-0694af4acb59",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "archive",
+							"protocolProfileBehavior": {
+								"strictSSL": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{item_http_host}}/api/v1/items/71ced7d2-5451-4d86-b5a2-0694af4acb59/archive",
+									"host": [
+										"{{item_http_host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"items",
+										"71ced7d2-5451-4d86-b5a2-0694af4acb59",
+										"archive"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unarchive",
+							"protocolProfileBehavior": {
+								"strictSSL": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{item_http_host}}/api/v1/items/71ced7d2-5451-4d86-b5a2-0694af4acb59/unarchive",
+									"host": [
+										"{{item_http_host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"items",
+										"71ced7d2-5451-4d86-b5a2-0694af4acb59",
+										"unarchive"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				}
 			]
 		}

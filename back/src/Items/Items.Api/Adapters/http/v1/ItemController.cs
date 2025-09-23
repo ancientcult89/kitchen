@@ -1,5 +1,9 @@
 ﻿using Items.Api.Adapters.http.v1.Contract;
 using Items.Core.Application.UseCases.Commands.AddItem;
+using Items.Core.Application.UseCases.Commands.ArchiveItem;
+using Items.Core.Application.UseCases.Commands.UnArchiveItem;
+using Items.Core.Application.UseCases.Query.GetAllItems;
+using Items.Core.Application.UseCases.Query.GetItem;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Primitives;
@@ -32,7 +36,82 @@ namespace Items.Api.Adapters.http.v1
             if(response.IsSuccess)
                 return Ok();
 
-            return Conflict();
+            return Conflict(response.Error);
+        }
+
+        [HttpPost]
+        [Route("{itemId}/archive")]
+        [Consumes("application/json")]
+        [SwaggerOperation("ArchiveItem")]
+        [SwaggerResponse(statusCode: 400, type: typeof(Error), description: "Ошибка валидации")]
+        [SwaggerResponse(statusCode: 409, type: typeof(Error), description: "Ошибка выполнения бизнес логики")]
+        [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
+        public async Task<IActionResult> ArchiveItem(Guid itemId)
+        {
+            var ArchiveItemCommand = new ArchiveItemCommand(itemId);
+
+            var response = await _mediator.Send(ArchiveItemCommand);
+
+            if (response.IsSuccess)
+                return Ok();
+
+            return Conflict(response.Error);
+        }
+
+        [HttpPost]
+        [Route("{itemId}/unarchive")]
+        [Consumes("application/json")]
+        [SwaggerOperation("UnArchiveItem")]
+        [SwaggerResponse(statusCode: 400, type: typeof(Error), description: "Ошибка валидации")]
+        [SwaggerResponse(statusCode: 409, type: typeof(Error), description: "Ошибка выполнения бизнес логики")]
+        [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
+        public async Task<IActionResult> UnArchiveItem(Guid itemId)
+        {
+            var UnArchiveItemCommand = new UnArchiveItemCommand(itemId);
+
+            var response = await _mediator.Send(UnArchiveItemCommand);
+
+            if (response.IsSuccess)
+                return Ok();
+
+            return Conflict(response.Error);
+        }
+
+        [HttpGet]
+        [Consumes("application/json")]
+        [SwaggerOperation("GetAllItems")]
+        [SwaggerResponse(statusCode: 400, type: typeof(Error), description: "Ошибка валидации")]
+        [SwaggerResponse(statusCode: 409, type: typeof(Error), description: "Ошибка выполнения бизнес логики")]
+        [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
+        public async Task<IActionResult> GetAllItems()
+        {
+            var getAllItemsQuery = new GetAllItemsQuery();
+
+            var response = await _mediator.Send(getAllItemsQuery);
+
+            if (response.HasNoValue)
+                return NotFound();
+
+            return Ok(response.Value.Items);
+        }
+
+        [HttpGet]
+        [Route("{itemId}")]
+        [Consumes("application/json")]
+        [SwaggerOperation("GetAllItems")]
+        [SwaggerResponse(statusCode: 400, type: typeof(Error), description: "Ошибка валидации")]
+        [SwaggerResponse(statusCode: 409, type: typeof(Error), description: "Ошибка выполнения бизнес логики")]
+        [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
+        public async Task<IActionResult> GetItem(Guid itemId)
+        {
+            var getItemQuery = new GetItemQuery(itemId);
+
+            var response = await _mediator.Send(getItemQuery);
+
+            if (response.HasNoValue)
+                return NotFound();
+
+            return Ok(response.Value.Item);
         }
     }
 }

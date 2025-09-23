@@ -1,5 +1,9 @@
 using CSharpFunctionalExtensions;
 using Items.Core.Application.UseCases.Commands.AddItem;
+using Items.Core.Application.UseCases.Commands.ArchiveItem;
+using Items.Core.Application.UseCases.Commands.UnArchiveItem;
+using Items.Core.Application.UseCases.Query.GetAllItems;
+using Items.Core.Application.UseCases.Query.GetItem;
 using Items.Core.Ports;
 using Items.Infrastructure.Adapters.Postgres;
 using Items.Infrastructure.Adapters.Postgres.Repositories;
@@ -46,10 +50,13 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Get
 
 #region Commands
 builder.Services.AddScoped<IRequestHandler<AddItemCommand, UnitResult<Error>>, AddItemCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ArchiveItemCommand, UnitResult<Error>>, ArchiveItemCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<UnArchiveItemCommand, UnitResult<Error>>, UnArchiveItemCommandHandler>();
 #endregion Commands
 
 #region Queries
-
+builder.Services.AddScoped<IRequestHandler<GetAllItemsQuery, Maybe<GetAllItemsResponse>>, GetAllItemsQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<GetItemQuery, Maybe<GetItemResponse>>, GetItemQueryHandler>();
 #endregion Queries
 
 builder.Services.AddControllers();

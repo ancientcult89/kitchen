@@ -26,7 +26,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveItemCommand { ItemId = itemId };
+            var command = new UnArchiveItemCommand(itemId);
 
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
             // Сначала архивируем, чтобы потом разархивировать
@@ -47,7 +47,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_EmptyGuid_ShouldReturnError()
         {
             // Arrange
-            var command = new UnArchiveItemCommand { ItemId = Guid.Empty };
+            var command = new UnArchiveItemCommand(Guid.Empty);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -67,7 +67,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveItemCommand { ItemId = itemId };
+            var command = new UnArchiveItemCommand(itemId);
 
             _itemRepository.GetAsync(itemId).Returns((Item?)null);
 
@@ -88,7 +88,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveItemCommand { ItemId = itemId };
+            var command = new UnArchiveItemCommand(itemId);
 
             // Создаем неархивированный item
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
@@ -112,7 +112,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveItemCommand { ItemId = itemId };
+            var command = new UnArchiveItemCommand(itemId);
 
             _itemRepository.GetAsync(itemId).ThrowsAsync(new InvalidOperationException("Database error"));
 
@@ -128,7 +128,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveItemCommand { ItemId = itemId };
+            var command = new UnArchiveItemCommand(itemId);
 
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
             item.MakeArchive(); // Архивируем для разархивации
@@ -150,7 +150,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveItemCommand { ItemId = itemId };
+            var command = new UnArchiveItemCommand(itemId);
 
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
             item.MakeArchive(); // Архивируем для разархивации

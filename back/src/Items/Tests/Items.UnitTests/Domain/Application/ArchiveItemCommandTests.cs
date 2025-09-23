@@ -26,7 +26,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveItemCommand { ItemId = itemId };
+            var command = new ArchiveItemCommand(itemId);
 
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
@@ -44,7 +44,7 @@ namespace Items.UnitTests.Domain.Application
         public async Task Handle_EmptyGuid_ShouldReturnError()
         {
             // Arrange
-            var command = new ArchiveItemCommand { ItemId = Guid.Empty };
+            var command = new ArchiveItemCommand(Guid.Empty);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -64,7 +64,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveItemCommand { ItemId = itemId };
+            var command = new ArchiveItemCommand(itemId);
 
             _itemRepository.GetAsync(itemId).Returns((Item?)null);
 
@@ -85,7 +85,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveItemCommand { ItemId = itemId };
+            var command = new ArchiveItemCommand(itemId);
 
             _itemRepository.GetAsync(itemId).ThrowsAsync(new InvalidOperationException("Database error"));
 
@@ -101,7 +101,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveItemCommand { ItemId = itemId };
+            var command = new ArchiveItemCommand(itemId);
 
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
@@ -121,7 +121,7 @@ namespace Items.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveItemCommand { ItemId = itemId };
+            var command = new ArchiveItemCommand(itemId);
 
             var item = Item.Create("Test Item", MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);

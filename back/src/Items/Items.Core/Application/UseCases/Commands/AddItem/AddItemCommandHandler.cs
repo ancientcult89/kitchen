@@ -17,7 +17,7 @@ namespace Items.Core.Application.UseCases.Commands.AddItem
         }
         public async Task<UnitResult<Error>> Handle(AddItemCommand request, CancellationToken cancellationToken)
         {
-            var measureTypeResult = MeasureType.CreateFromString(request.MeasureType);
+            var measureTypeResult = MeasureType.CreateFromId(request.MeasureType);
             if (measureTypeResult.IsFailure)
                 return measureTypeResult.Error;
 

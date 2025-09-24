@@ -21,18 +21,18 @@ namespace Items.Infrastructure.Adapters.Postgres.Repositories
         public bool CheckDuplicate(AddItemCommand request)
         {
             var normalizedRequestName = request.Name.Trim();
-            var normalizedRequestMeasureType = request.MeasureType.Trim().ToLowerInvariant();
+            var measureTypeId = request.MeasureType;
 
             // Один EF запрос с проверкой MeasureType на стороне БД
             return _dbContext.Items
                 .Where(i => EF.Functions.ILike(i.Name, normalizedRequestName) &&
-                            EF.Functions.ILike(i.MeasureType.Name, normalizedRequestMeasureType))
+                            i.MeasureType.Id == measureTypeId)
                 .Any();
         }
 
         public async Task<Maybe<List<Item>>> GetAllAsync()
         {
-            return await _dbContext.Items.ToListAsync();
+            return await _dbContext.Items.Include(i => i.MeasureType).ToListAsync();
         }
 
         public async Task<Maybe<Item>> GetAsync(Guid itemId)
@@ -42,6 +42,7 @@ namespace Items.Infrastructure.Adapters.Postgres.Repositories
 
             var item = await _dbContext
                 .Items
+                .Include(i => i.MeasureType)
                 .SingleOrDefaultAsync(i => i.Id == itemId);
 
             return item;

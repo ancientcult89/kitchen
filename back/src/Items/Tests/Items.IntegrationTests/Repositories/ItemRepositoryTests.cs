@@ -46,8 +46,7 @@ namespace Items.IntegrationTests.Repositories
         public async Task AddAsync_WhenItemIsValid_ShouldAddItemToDatabase()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var item = Item.Create("Test Item", measureType).Value;
 
@@ -68,15 +67,14 @@ namespace Items.IntegrationTests.Repositories
         public void CheckDuplicate_WhenDuplicateExists_ShouldReturnTrue()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var existingItem = Item.Create("Duplicate Item", measureType).Value;
 
             _context.Items.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddItemCommand("Duplicate Item", "weight");
+            var request = new AddItemCommand("Duplicate Item", MeasureType.Weight.Id);
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -89,15 +87,14 @@ namespace Items.IntegrationTests.Repositories
         public void CheckDuplicate_WhenNoDuplicate_ShouldReturnFalse()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var existingItem = Item.Create("Existing Item", measureType).Value;
 
             _context.Items.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddItemCommand("Different Item", "weight");
+            var request = new AddItemCommand("Different Item", MeasureType.Weight.Id);
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -110,15 +107,14 @@ namespace Items.IntegrationTests.Repositories
         public void CheckDuplicate_WhenSameNameButDifferentMeasureType_ShouldReturnFalse()
         {
             // Arrange
-            var measureType1Result = MeasureType.CreateFromString("weight");
-            var measureType1 = measureType1Result.Value;
+            var measureType1 = MeasureType.Weight;
 
             var existingItem = Item.Create("Test Item", measureType1).Value;
 
             _context.Items.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddItemCommand("Test Item", "liquid");
+            var request = new AddItemCommand("Test Item", MeasureType.Liquid.Id);
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -131,15 +127,14 @@ namespace Items.IntegrationTests.Repositories
         public void CheckDuplicate_WhenCaseSensitiveNames_ShouldHandleCorrectly()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var existingItem = Item.Create("Test Item", measureType).Value;
 
             _context.Items.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddItemCommand("test item", "WEIGHT");
+            var request = new AddItemCommand("test item", MeasureType.Weight.Id);
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -152,10 +147,8 @@ namespace Items.IntegrationTests.Repositories
         public async Task GetAllAsync_WhenItemsExist_ShouldReturnAllItems()
         {
             // Arrange
-            var measureType1Result = MeasureType.CreateFromString("weight");
-            var measureType2Result = MeasureType.CreateFromString("liquid");
-            var measureType1 = measureType1Result.Value;
-            var measureType2 = measureType2Result.Value;
+            var measureType1 = MeasureType.Weight;
+            var measureType2 = MeasureType.Liquid;
 
             var items = new List<Item>()
         {
@@ -191,8 +184,7 @@ namespace Items.IntegrationTests.Repositories
         public async Task GetAsync_WhenItemExists_ShouldReturnItem()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var item = Item.Create("Test Item", measureType).Value;
             await _context.Items.AddAsync(item);
@@ -235,15 +227,14 @@ namespace Items.IntegrationTests.Repositories
         public void CheckDuplicate_WhenMeasureTypeHasSpaces_ShouldTrimAndCompare()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var existingItem = Item.Create("Test Item", measureType).Value;
 
             _context.Items.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddItemCommand("Test Item", "  weight  ");
+            var request = new AddItemCommand("Test Item", MeasureType.Weight.Id);
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -256,15 +247,14 @@ namespace Items.IntegrationTests.Repositories
         public void CheckDuplicate_WhenUnknownMeasureType_ShouldReturnFalse()
         {
             // Arrange
-            var measureTypeResult = MeasureType.CreateFromString("weight");
-            var measureType = measureTypeResult.Value;
+            var measureType = MeasureType.Weight;
 
             var existingItem = Item.Create("Test Item", measureType).Value;
 
             _context.Items.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddItemCommand("Test Item", "unknown_type");
+            var request = new AddItemCommand("Test Item", -1);
 
             // Act
             var result = _repository.CheckDuplicate(request);

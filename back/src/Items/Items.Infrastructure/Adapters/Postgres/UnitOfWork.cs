@@ -1,4 +1,7 @@
-﻿using Primitives;
+﻿using Items.Core.Domain.Model.ItemAgregate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Primitives;
 
 namespace Items.Infrastructure.Adapters.Postgres
 {

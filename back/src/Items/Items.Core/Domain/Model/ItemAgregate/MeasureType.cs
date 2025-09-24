@@ -3,7 +3,7 @@ using Primitives;
 
 namespace Items.Core.Domain.Model.ItemAgregate
 {
-    public class MeasureType : ValueObject
+    public class MeasureType : Entity<int>
     {
         //Название меры измерения
         public string Name { get; private set; }
@@ -11,36 +11,45 @@ namespace Items.Core.Domain.Model.ItemAgregate
         /// <summary>
         /// Единицы измерения по массе
         /// </summary>
-        public static MeasureType Weight => new(nameof(Weight).ToLowerInvariant());
+        public static MeasureType Weight => new(1, nameof(Weight).ToLowerInvariant());
 
         /// <summary>
         /// Единицы измерения для жидкости
         /// </summary>
-        public static MeasureType Liquid => new(nameof(Liquid).ToLowerInvariant());
+        public static MeasureType Liquid => new(2, nameof(Liquid).ToLowerInvariant());
         private MeasureType() { }
-        private MeasureType(string name) : this()
+        private MeasureType(int id, string name) : this()
         {
+            Id = id;
             Name = name;
         }
 
-        public static Result<MeasureType, Error> CreateFromString(string measureTypeName)
+        public static IEnumerable<MeasureType> List() =>
+            new[] { Weight, Liquid };
+
+        public static Result<MeasureType, Error> CreateFromName(string name)
         {
-            if (string.IsNullOrWhiteSpace(measureTypeName))
-                return new Error("measure.type.cannot.be.empty", "Measure type name cannot be empty");
+            var state = List()
+                .SingleOrDefault(s => String.Equals(s.Name, name, StringComparison.CurrentCultureIgnoreCase));
 
-            var normalizedName = measureTypeName.Trim().ToLowerInvariant();
-
-            return normalizedName switch
+            if (state == null)
             {
-                "weight" => MeasureType.Weight,
-                "liquid" => MeasureType.Liquid,
-                _ => new Error("unknown.measure.type", $"Unknown measure type: {normalizedName}")
-            };
+                return new Error("unknown.measure.type", $"Possible values for {nameof(MeasureType)}: {String.Join(",", List().Select(s => s.Name))}");
+            }
+
+            return state;
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        public static Result<MeasureType, Error> CreateFromId(int id)
         {
-            yield return Name.ToLowerInvariant();
+            var state = List().SingleOrDefault(s => s.Id == id);
+
+            if (state == null)
+            {
+                return new Error("unknown.measure.type", $"Possible values for {nameof(MeasureType)}: {String.Join(",", List().Select(s => s.Name))}");
+            }
+
+            return state;
         }
 
         public override string ToString()

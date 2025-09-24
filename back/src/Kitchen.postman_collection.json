@@ -41,7 +41,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"name\": \"string\",\r\n  \"measureType\": \"liquid\"\r\n}",
+									"raw": "{\r\n  \"name\": \"test123\",\r\n  \"measureType\": 1\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"

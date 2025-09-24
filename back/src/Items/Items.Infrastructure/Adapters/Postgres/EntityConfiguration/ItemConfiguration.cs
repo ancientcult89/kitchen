@@ -6,35 +6,39 @@ namespace Items.Infrastructure.Adapters.Postgres.EntityConfiguration
 {
     public class ItemConfiguration : IEntityTypeConfiguration<Item>
     {
-        public void Configure(EntityTypeBuilder<Item> entityTypeBuilder)
+        public void Configure(EntityTypeBuilder<Item> builder)
         {
-            entityTypeBuilder.ToTable("items");
+            builder.ToTable("items");
 
-            entityTypeBuilder.HasKey(entity => entity.Id);
+            builder.HasKey(entity => entity.Id);
 
-            entityTypeBuilder
-                .Property(entity => entity.Id)
+            builder.Property(entity => entity.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id")
                 .IsRequired();
 
-            entityTypeBuilder
-                .Property(entity => entity.Name)
+            builder.Property(entity => entity.Name)
                 .HasColumnName("name")
                 .IsRequired();
 
-            entityTypeBuilder
-                .Property(entity => entity.IsArchive)
+            builder.Property(entity => entity.IsArchive)
                 .HasColumnName("is_archive")
                 .IsRequired();
 
-            entityTypeBuilder
-                .OwnsOne(entity => entity.MeasureType, a =>
-                {
-                    a.Property(c => c.Name).HasColumnName("measure_type").IsRequired();
-                    a.WithOwner();
-                });
-            entityTypeBuilder.Navigation(entity => entity.MeasureType).IsRequired();
+            // Важно: настраиваем связь и указываем, что MeasureType уже существует
+            builder.HasOne(entity => entity.MeasureType)
+                .WithMany()
+                .HasForeignKey("measure_type_id")
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Указываем свойство для внешнего ключа
+            builder.Property<int>("measure_type_id")
+                .HasColumnName("measure_type_id");
+
+            // Важно: говорим EF, что MeasureType не нужно отслеживать изменения
+            builder.Navigation(entity => entity.MeasureType)
+                .AutoInclude(false); // Отключаем автоматическую загрузку
         }
     }
 }

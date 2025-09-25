@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "Item",
+			"name": "Products",
 			"item": [
 				{
 					"name": "http",
@@ -32,7 +32,7 @@
 							"response": []
 						},
 						{
-							"name": "items (add item)",
+							"name": "products (add product)",
 							"protocolProfileBehavior": {
 								"strictSSL": false
 							},
@@ -49,14 +49,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{item_http_host}}/api/v1/items/",
+									"raw": "{{item_http_host}}/api/v1/products/",
 									"host": [
 										"{{item_http_host}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"items",
+										"products",
 										""
 									]
 								}
@@ -64,7 +64,7 @@
 							"response": []
 						},
 						{
-							"name": "items (all)",
+							"name": "products (all)",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true,
 								"strictSSL": false
@@ -82,14 +82,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{item_http_host}}/api/v1/items/",
+									"raw": "{{item_http_host}}/api/v1/products/",
 									"host": [
 										"{{item_http_host}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"items",
+										"products",
 										""
 									]
 								}
@@ -97,7 +97,7 @@
 							"response": []
 						},
 						{
-							"name": "items (by ID)",
+							"name": "products (by ID)",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true,
 								"strictSSL": false
@@ -115,16 +115,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{item_http_host}}/api/v1/items/71ced7d2-5451-4d86-b5a2-0694af4acb59/",
+									"raw": "{{item_http_host}}/api/v1/products/9459c4a9-26c6-425c-9b2e-521a11a5e9c4",
 									"host": [
 										"{{item_http_host}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"items",
-										"71ced7d2-5451-4d86-b5a2-0694af4acb59",
-										""
+										"products",
+										"9459c4a9-26c6-425c-9b2e-521a11a5e9c4"
 									]
 								}
 							},
@@ -148,15 +147,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{item_http_host}}/api/v1/items/71ced7d2-5451-4d86-b5a2-0694af4acb59/archive",
+									"raw": "{{item_http_host}}/api/v1/products/9459c4a9-26c6-425c-9b2e-521a11a5e9c4/archive",
 									"host": [
 										"{{item_http_host}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"items",
-										"71ced7d2-5451-4d86-b5a2-0694af4acb59",
+										"products",
+										"9459c4a9-26c6-425c-9b2e-521a11a5e9c4",
 										"archive"
 									]
 								}
@@ -181,15 +180,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{item_http_host}}/api/v1/items/71ced7d2-5451-4d86-b5a2-0694af4acb59/unarchive",
+									"raw": "{{item_http_host}}/api/v1/products/9459c4a9-26c6-425c-9b2e-521a11a5e9c4/unarchive",
 									"host": [
 										"{{item_http_host}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"items",
-										"71ced7d2-5451-4d86-b5a2-0694af4acb59",
+										"products",
+										"9459c4a9-26c6-425c-9b2e-521a11a5e9c4",
 										"unarchive"
 									]
 								}

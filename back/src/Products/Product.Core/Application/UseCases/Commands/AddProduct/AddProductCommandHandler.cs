@@ -9,34 +9,34 @@ namespace Products.Core.Application.UseCases.Commands.AddProduct
 {
     public class AddProductCommandHandler : IRequestHandler<AddProductCommand, UnitResult<Error>>
     {
-        private readonly IProductRepository _itemRepository;
+        private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public AddProductCommandHandler(IProductRepository itemRepository, IUnitOfWork unitOfWork)
+        public AddProductCommandHandler(IProductRepository productRepository, IUnitOfWork unitOfWork)
         {
-            _itemRepository = itemRepository;
+            _productRepository = productRepository;
             _unitOfWork = unitOfWork;
         }
         public async Task<UnitResult<Error>> Handle(AddProductCommand request, CancellationToken cancellationToken)
         {
-            var measureTypeResult = MeasureType.CreateFromId(request.MeasureType);
+            var measureTypeResult = MeasureType.CreateFromId(request.MeasureTypeId);
             if (measureTypeResult.IsFailure)
                 return measureTypeResult.Error;
 
             MeasureType measureType = measureTypeResult.Value;
 
-            var newItemResult = Product.Create(request.Name, measureType);
+            var newProductResult = Product.Create(request.Name, measureType);
 
-            if (newItemResult.IsFailure)
-                return newItemResult.Error;
+            if (newProductResult.IsFailure)
+                return newProductResult.Error;
 
-            Product newItem = newItemResult.Value;
+            Product newProduct = newProductResult.Value;
 
-            var sameItemIsExists = _itemRepository.CheckDuplicate(request);
+            var sameProductIsExists = _productRepository.CheckDuplicate(request);
 
-            if (sameItemIsExists)
-                return Errors.ItemWithSameNameAndMeasureTypeExists(newItem.Name, newItem.MeasureType);
+            if (sameProductIsExists)
+                return Errors.ItemWithSameNameAndMeasureTypeExists(newProduct.Name, newProduct.MeasureType);
 
-            await _itemRepository.AddAsync(newItem);
+            await _productRepository.AddAsync(newProduct);
             await _unitOfWork.SaveChangesAsync();
 
             return UnitResult.Success<Error>();
@@ -47,12 +47,12 @@ namespace Products.Core.Application.UseCases.Commands.AddProduct
             [Obsolete]
             public static Error ItemWithIdAlreadyExists(Guid itemId)
             {
-                return new Error("item.id.already.exists", $"Item with ID {itemId} already exists in the collection");
+                return new Error("product.id.already.exists", $"Product with ID {itemId} already exists in the collection");
             }
 
             public static Error ItemWithSameNameAndMeasureTypeExists(string name, MeasureType measureType)
             {
-                return new Error("item.unique.violation", $"Item with name '{name}' and measure type '{measureType}' already exists");
+                return new Error("product.unique.violation", $"Product with name '{name}' and measure type '{measureType}' already exists");
             }
         }
     }

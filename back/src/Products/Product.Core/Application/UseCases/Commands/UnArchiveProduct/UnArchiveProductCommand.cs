@@ -6,10 +6,18 @@ namespace Products.Core.Application.UseCases.Commands.UnArchiveProduct
 {
     public class UnArchiveProductCommand : IRequest<UnitResult<Error>>
     {
-        public UnArchiveProductCommand(Guid itemId)
+        private UnArchiveProductCommand(Guid productId)
         {
-            ItemId = itemId;
+            ProductId = productId;
         }
-        public Guid ItemId { get; set; }
+
+        public static Result<UnArchiveProductCommand, Error> Create(Guid productId)
+        {
+            if (productId == Guid.Empty)
+                return GeneralErrors.ValueIsRequired(nameof(productId));
+
+            return new UnArchiveProductCommand(productId);
+        }
+        public Guid ProductId { get; set; }
     }
 }

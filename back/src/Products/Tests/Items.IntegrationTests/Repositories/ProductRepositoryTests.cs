@@ -75,7 +75,7 @@ namespace Products.IntegrationTests.Repositories
             _context.Products.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddProductCommand("Duplicate Item", MeasureType.Weight.Id);
+            var request = AddProductCommand.Create("Duplicate Item", MeasureType.Weight.Id).Value;
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -95,7 +95,7 @@ namespace Products.IntegrationTests.Repositories
             _context.Products.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddProductCommand("Different Item", MeasureType.Weight.Id);
+            var request = AddProductCommand.Create("Different Item", MeasureType.Weight.Id).Value;
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -115,7 +115,7 @@ namespace Products.IntegrationTests.Repositories
             _context.Products.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddProductCommand("Test Item", MeasureType.Liquid.Id);
+            var request = AddProductCommand.Create("Test Item", MeasureType.Liquid.Id).Value;
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -135,7 +135,7 @@ namespace Products.IntegrationTests.Repositories
             _context.Products.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddProductCommand("test item", MeasureType.Weight.Id);
+            var request = AddProductCommand.Create("test item", MeasureType.Weight.Id).Value;
 
             // Act
             var result = _repository.CheckDuplicate(request);
@@ -235,33 +235,13 @@ namespace Products.IntegrationTests.Repositories
             _context.Products.Add(existingItem);
             _context.SaveChanges();
 
-            var request = new AddProductCommand("Test Item", MeasureType.Weight.Id);
+            var request = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
             // Act
             var result = _repository.CheckDuplicate(request);
 
             // Assert
             Assert.True(result);
-        }
-
-        [Fact]
-        public void CheckDuplicate_WhenUnknownMeasureType_ShouldReturnFalse()
-        {
-            // Arrange
-            var measureType = MeasureType.Weight;
-
-            var existingItem = Product.Create("Test Item", measureType).Value;
-
-            _context.Products.Add(existingItem);
-            _context.SaveChanges();
-
-            var request = new AddProductCommand("Test Item", -1);
-
-            // Act
-            var result = _repository.CheckDuplicate(request);
-
-            // Assert
-            Assert.False(result); // Неизвестный тип меры не должен считаться дубликатом
         }
     }
 }

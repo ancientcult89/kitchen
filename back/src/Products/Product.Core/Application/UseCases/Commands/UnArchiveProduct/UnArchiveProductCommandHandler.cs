@@ -8,32 +8,29 @@ namespace Products.Core.Application.UseCases.Commands.UnArchiveProduct
 {
     public class UnArchiveProductCommandHandler : IRequestHandler<UnArchiveProductCommand, UnitResult<Error>>
     {
-        private readonly IProductRepository _itemRepository;
+        private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public UnArchiveProductCommandHandler(IProductRepository itemRepository, IUnitOfWork unitOfWork)
+        public UnArchiveProductCommandHandler(IProductRepository productRepository, IUnitOfWork unitOfWork)
         {
-            _itemRepository = itemRepository;
+            _productRepository = productRepository;
             _unitOfWork = unitOfWork;
         }
 
         public async Task<UnitResult<Error>> Handle(UnArchiveProductCommand request, CancellationToken cancellationToken)
         {
-            if (Guid.Empty == request.ItemId)
-                return GeneralErrors.ValueIsRequired(nameof(request.ItemId));
+            var unarchivedProductResult = await _productRepository.GetAsync(request.ProductId);
 
-            var archivedItemResult = await _itemRepository.GetAsync(request.ItemId);
+            if (unarchivedProductResult.HasNoValue)
+                return new Error("no.such.product", $"There is no products with ID: {request.ProductId}");
 
-            if (archivedItemResult.HasNoValue)
-                return new Error("no.such.item", $"There is no items with ID: {request.ItemId}");
+            Product unarchiverProduct = unarchivedProductResult.Value;
 
-            Product archivedItem = archivedItemResult.Value;
-
-            var result = archivedItem.MakeUnArchive();
+            var result = unarchiverProduct.MakeUnArchive();
 
             if (!result.IsSuccess)
                 return result.Error;
 
-            _itemRepository.Update(archivedItem);
+            _productRepository.Update(unarchiverProduct);
 
             await _unitOfWork.SaveChangesAsync();
 

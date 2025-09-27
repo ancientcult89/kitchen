@@ -6,10 +6,18 @@ namespace Products.Core.Application.UseCases.Commands.ArchiveProduct
 {
     public class ArchiveProductCommand : IRequest<UnitResult<Error>>
     {
-        public ArchiveProductCommand(Guid itemId)
+        private ArchiveProductCommand(Guid productId)
         {
-            ItemId = itemId;
+            ProductId = productId;
         }
-        public Guid ItemId { get; set; }
+
+        public static Result<ArchiveProductCommand, Error> Create(Guid productId)
+        {
+            if (productId == Guid.Empty)
+                return GeneralErrors.ValueIsRequired(nameof(productId));
+
+            return new ArchiveProductCommand(productId);
+        }
+        public Guid ProductId { get; set; }
     }
 }

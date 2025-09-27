@@ -18,13 +18,10 @@ namespace Products.Core.Application.UseCases.Commands.ArchiveProduct
 
         public async Task<UnitResult<Error>> Handle(ArchiveProductCommand request, CancellationToken cancellationToken)
         {
-            if (Guid.Empty == request.ItemId)
-                return GeneralErrors.ValueIsRequired(nameof(request.ItemId));
-
-            var archivedItemResult = await _itemRepository.GetAsync(request.ItemId);
+            var archivedItemResult = await _itemRepository.GetAsync(request.ProductId);
 
             if (archivedItemResult.HasNoValue)
-                return new Error("no.such.item", $"There is no items with ID: {request.ItemId}");
+                return new Error("no.such.item", $"There is no items with ID: {request.ProductId}");
 
             Product archivedItem = archivedItemResult.Value;
             var result = archivedItem.MakeArchive();

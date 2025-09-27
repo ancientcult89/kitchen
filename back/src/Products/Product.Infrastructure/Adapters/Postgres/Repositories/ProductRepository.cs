@@ -21,7 +21,7 @@ namespace Products.Infrastructure.Adapters.Postgres.Repositories
         public bool CheckDuplicate(AddProductCommand request)
         {
             var normalizedRequestName = request.Name.Trim();
-            var measureTypeId = request.MeasureType;
+            var measureTypeId = request.MeasureTypeId;
 
             // Один EF запрос с проверкой MeasureType на стороне БД
             return _dbContext.Products

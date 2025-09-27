@@ -1,21 +1,23 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentAssertions;
+using MediatR;
+using NSubstitute;
+using Primitives;
 using Products.Core.Application.Dto.ProductAggregate;
 using Products.Core.Application.UseCases.Query.GetProduct;
 using Products.Core.Domain.Model.ProductAggregate;
 using Products.Core.Domain.Model.SharedKernel;
 using Products.Core.Ports;
-using NSubstitute;
 using System.Reflection;
 
-namespace Products.UnitTests.Domain.Application
+namespace Products.UnitTests.Domain.Application.GetProductQueryTests
 {
-    public class GetProductQueryTests
+    public class GetProductQueryHandlerTests
     {
         private readonly IProductRepository _mockRepository;
         private readonly GetProductQueryHandler _handler;
 
-        public GetProductQueryTests()
+        public GetProductQueryHandlerTests()
         {
             _mockRepository = Substitute.For<IProductRepository>();
             _handler = new GetProductQueryHandler(_mockRepository);
@@ -35,7 +37,7 @@ namespace Products.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -62,7 +64,7 @@ namespace Products.UnitTests.Domain.Application
 
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -81,7 +83,7 @@ namespace Products.UnitTests.Domain.Application
 
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -99,7 +101,7 @@ namespace Products.UnitTests.Domain.Application
             _mockRepository.GetAsync(itemId).Returns<Task<Maybe<Product>>>(x =>
                 throw new InvalidOperationException("Database error"));
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
 
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -114,8 +116,8 @@ namespace Products.UnitTests.Domain.Application
 
             // Используем reflection для вызова private метода
             var handlerType = _handler.GetType();
-            var mapItemMethod = handlerType.GetMethod("MapItem",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var mapItemMethod = handlerType.GetMethod("MapProduct",
+                BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Act
             var result = (ProductDto)mapItemMethod.Invoke(_handler, new object[] { item });
@@ -134,15 +136,15 @@ namespace Products.UnitTests.Domain.Application
             // Arrange
             // Используем reflection для вызова private метода
             var handlerType = _handler.GetType();
-            var mapItemMethod = handlerType.GetMethod("MapItem",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var mapItemMethod = handlerType.GetMethod("MapProduct",
+                BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Act & Assert
             var exception = Assert.Throws<TargetInvocationException>(() =>
                 mapItemMethod.Invoke(_handler, new object[] { null }));
 
             Assert.IsType<ArgumentNullException>(exception.InnerException);
-            Assert.Equal("item", ((ArgumentNullException)exception.InnerException).ParamName);
+            Assert.Equal("product", ((ArgumentNullException)exception.InnerException).ParamName);
         }
 
         [Fact]
@@ -158,7 +160,7 @@ namespace Products.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -179,7 +181,7 @@ namespace Products.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -200,7 +202,7 @@ namespace Products.UnitTests.Domain.Application
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
 
-            var query = new GetProductQuery(itemId);
+            var query = GetProductQuery.Create(itemId).Value;
             var cancellationToken = new CancellationTokenSource().Token;
 
             // Act

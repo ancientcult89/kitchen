@@ -3,6 +3,6 @@
     public class NewProduct
     {
         public string Name { get; set; }
-        public int MeasureType { get; set; }
+        public int MeasureTypeId { get; set; }
     }
 }

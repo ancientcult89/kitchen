@@ -7,15 +7,15 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Primitives;
 
-namespace Products.UnitTests.Domain.Application
+namespace Products.UnitTests.Domain.Application.ArchiveProductCommandTests
 {
-    public class ArchiveProductCommandTests
+    public class ArchiveProductCommandHandlerTests
     {
         private readonly IProductRepository _itemRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ArchiveProductCommandHandler _handler;
 
-        public ArchiveProductCommandTests()
+        public ArchiveProductCommandHandlerTests()
         {
             _itemRepository = Substitute.For<IProductRepository>();
             _unitOfWork = Substitute.For<IUnitOfWork>();
@@ -27,7 +27,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveProductCommand(itemId);
+            var command = ArchiveProductCommand.Create(itemId).Value;
 
             var item = Product.Create("Test Product", MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
@@ -42,30 +42,11 @@ namespace Products.UnitTests.Domain.Application
         }
 
         [Fact]
-        public async Task Handle_EmptyGuid_ShouldReturnError()
-        {
-            // Arrange
-            var command = new ArchiveProductCommand(Guid.Empty);
-
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.IsFailure.Should().BeTrue();
-            result.Error.Code.Should().Be("value.is.required");
-            result.Error.Message.Should().Contain("ItemId");
-
-            await _itemRepository.DidNotReceive().GetAsync(Arg.Any<Guid>());
-            _itemRepository.DidNotReceive().Update(Arg.Any<Product>());
-            await _unitOfWork.DidNotReceive().SaveChangesAsync();
-        }
-
-        [Fact]
         public async Task Handle_ItemNotFound_ShouldReturnError()
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveProductCommand(itemId);
+            var command = ArchiveProductCommand.Create(itemId).Value;
 
             _itemRepository.GetAsync(itemId).Returns((Product?)null);
 
@@ -86,7 +67,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveProductCommand(itemId);
+            var command = ArchiveProductCommand.Create(itemId).Value;
 
             _itemRepository.GetAsync(itemId).ThrowsAsync(new InvalidOperationException("Database error"));
 
@@ -102,7 +83,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveProductCommand(itemId);
+            var command = ArchiveProductCommand.Create(itemId).Value;
 
             var item = Product.Create("Test Product", MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
@@ -122,7 +103,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new ArchiveProductCommand(itemId);
+            var command = ArchiveProductCommand.Create(itemId).Value;
 
             var item = Product.Create("Test Product", MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);

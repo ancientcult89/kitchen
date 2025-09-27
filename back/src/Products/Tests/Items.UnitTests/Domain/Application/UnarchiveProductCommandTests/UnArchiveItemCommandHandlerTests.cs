@@ -7,15 +7,15 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Primitives;
 
-namespace Products.UnitTests.Domain.Application
+namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
 {
-    public class UnArchiveItemCommandTests
+    public class UnArchiveItemCommandHandlerTests
     {
         private readonly IProductRepository _itemRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UnArchiveProductCommandHandler _handler;
 
-        public UnArchiveItemCommandTests()
+        public UnArchiveItemCommandHandlerTests()
         {
             _itemRepository = Substitute.For<IProductRepository>();
             _unitOfWork = Substitute.For<IUnitOfWork>();
@@ -27,7 +27,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveProductCommand(itemId);
+            var command = UnArchiveProductCommand.Create(itemId).Value;
 
             var item = Product.Create("Test Item", MeasureType.Weight).Value;
             // Сначала архивируем, чтобы потом разархивировать
@@ -45,30 +45,11 @@ namespace Products.UnitTests.Domain.Application
         }
 
         [Fact]
-        public async Task Handle_EmptyGuid_ShouldReturnError()
-        {
-            // Arrange
-            var command = new UnArchiveProductCommand(Guid.Empty);
-
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.IsFailure.Should().BeTrue();
-            result.Error.Code.Should().Be("value.is.required");
-            result.Error.Message.Should().Contain("ItemId");
-
-            await _itemRepository.DidNotReceive().GetAsync(Arg.Any<Guid>());
-            _itemRepository.DidNotReceive().Update(Arg.Any<Product>());
-            await _unitOfWork.DidNotReceive().SaveChangesAsync();
-        }
-
-        [Fact]
         public async Task Handle_ItemNotFound_ShouldReturnError()
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveProductCommand(itemId);
+            var command = UnArchiveProductCommand.Create(itemId).Value;
 
             _itemRepository.GetAsync(itemId).Returns((Product?)null);
 
@@ -77,7 +58,7 @@ namespace Products.UnitTests.Domain.Application
 
             // Assert
             result.IsFailure.Should().BeTrue();
-            result.Error.Code.Should().Be("no.such.item");
+            result.Error.Code.Should().Be("no.such.product");
             result.Error.Message.Should().Contain(itemId.ToString());
 
             _itemRepository.DidNotReceive().Update(Arg.Any<Product>());
@@ -89,7 +70,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveProductCommand(itemId);
+            var command = UnArchiveProductCommand.Create(itemId).Value;
 
             // Создаем неархивированный item
             var item = Product.Create("Test Item", MeasureType.Weight).Value;
@@ -113,7 +94,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveProductCommand(itemId);
+            var command =  UnArchiveProductCommand.Create(itemId).Value;
 
             _itemRepository.GetAsync(itemId).ThrowsAsync(new InvalidOperationException("Database error"));
 
@@ -129,7 +110,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveProductCommand(itemId);
+            var command = UnArchiveProductCommand.Create(itemId).Value;
 
             var item = Product.Create("Test Item", MeasureType.Weight).Value;
             item.MakeArchive(); // Архивируем для разархивации
@@ -151,7 +132,7 @@ namespace Products.UnitTests.Domain.Application
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var command = new UnArchiveProductCommand(itemId);
+            var command = UnArchiveProductCommand.Create(itemId).Value;
 
             var item = Product.Create("Test Item", MeasureType.Weight).Value;
             item.MakeArchive(); // Архивируем для разархивации

@@ -6,7 +6,7 @@ using Products.Core.Ports;
 using NSubstitute;
 using Primitives;
 
-namespace Products.UnitTests.Domain.Application
+namespace Products.UnitTests.Domain.Application.AddProductCommandTests
 {
     public class AddItemCommandHandlerTests
     {
@@ -25,7 +25,7 @@ namespace Products.UnitTests.Domain.Application
         public async Task Handle_ValidCommand_ShouldCreateItemAndReturnSuccess()
         {
             // Arrange
-            var command = new AddProductCommand("Test Item", MeasureType.Weight.Id);
+            var command = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
             _itemRepository.CheckDuplicate(Arg.Any<AddProductCommand>()).Returns(false);
 
@@ -42,7 +42,7 @@ namespace Products.UnitTests.Domain.Application
         public async Task Handle_DuplicateItemExists_ShouldReturnError()
         {
             // Arrange
-            var command = new AddProductCommand("Test Item", MeasureType.Weight.Id);
+            var command = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
             _itemRepository.CheckDuplicate(Arg.Any<AddProductCommand>()).Returns(true);
 
@@ -51,39 +51,9 @@ namespace Products.UnitTests.Domain.Application
 
             // Assert
             result.IsFailure.Should().BeTrue();
-            result.Error.Code.Should().Be("item.unique.violation");
-            result.Error.Message.Should().Contain("Item with name 'Test Item'");
+            result.Error.Code.Should().Be("product.unique.violation");
+            result.Error.Message.Should().Contain("Product with name 'Test Item'");
 
-            await _itemRepository.DidNotReceive().AddAsync(Arg.Any<Product>());
-            await _unitOfWork.DidNotReceive().SaveChangesAsync();
-        }
-
-        [Fact]
-        public async Task Handle_InvalidMeasureType_ShouldReturnFailure()
-        {
-            // Arrange
-            var command = new AddProductCommand("Test Item", -1);
-
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.IsFailure.Should().BeTrue();
-            await _itemRepository.DidNotReceive().AddAsync(Arg.Any<Product>());
-            await _unitOfWork.DidNotReceive().SaveChangesAsync();
-        }
-
-        [Fact]
-        public async Task Handle_ItemCreationFails_ShouldReturnError()
-        {
-            // Arrange
-            var command = new AddProductCommand("", MeasureType.Weight.Id);
-
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.IsFailure.Should().BeTrue();
             await _itemRepository.DidNotReceive().AddAsync(Arg.Any<Product>());
             await _unitOfWork.DidNotReceive().SaveChangesAsync();
         }
@@ -92,7 +62,7 @@ namespace Products.UnitTests.Domain.Application
         public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
         {
             // Arrange
-            var command = new AddProductCommand("Test Item", MeasureType.Weight.Id);
+            var command = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
             _itemRepository.CheckDuplicate(Arg.Any<AddProductCommand>()).Returns(false);
             _itemRepository.When(x => x.AddAsync(Arg.Any<Product>()))
@@ -117,8 +87,8 @@ namespace Products.UnitTests.Domain.Application
 
             // Assert
             error.Should().NotBeNull();
-            error.Code.Should().Be("item.unique.violation");
-            error.Message.Should().Be($"Item with name '{name}' and measure type '{measureType}' already exists");
+            error.Code.Should().Be("product.unique.violation");
+            error.Message.Should().Be($"Product with name '{name}' and measure type '{measureType}' already exists");
         }
 
         [Fact]
@@ -132,8 +102,8 @@ namespace Products.UnitTests.Domain.Application
 
             // Assert
             error.Should().NotBeNull();
-            error.Code.Should().Be("item.id.already.exists");
-            error.Message.Should().Be($"Item with ID {itemId} already exists in the collection");
+            error.Code.Should().Be("product.id.already.exists");
+            error.Message.Should().Be($"Product with ID {itemId} already exists in the collection");
         }
     }
 }

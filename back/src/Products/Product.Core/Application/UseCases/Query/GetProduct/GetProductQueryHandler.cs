@@ -8,34 +8,34 @@ namespace Products.Core.Application.UseCases.Query.GetProduct
 {
     public class GetProductQueryHandler : IRequestHandler<GetProductQuery, Maybe<GetProductResponse>>
     {
-        private readonly IProductRepository _itemRepository;
-        public GetProductQueryHandler(IProductRepository itemRepository)
+        private readonly IProductRepository _productRepository;
+        public GetProductQueryHandler(IProductRepository productRepository)
         {
-            _itemRepository = itemRepository;
+            _productRepository = productRepository;
         }
         public async Task<Maybe<GetProductResponse>> Handle(GetProductQuery request, CancellationToken cancellationToken)
         {
-            var getItemResult = await _itemRepository.GetAsync(request.ItemId);
+            var getProductResult = await _productRepository.GetAsync(request.ProductId);
 
-            if (getItemResult.HasNoValue)
+            if (getProductResult.HasNoValue)
                 return null;
 
-            var item = getItemResult.Value;
+            var product = getProductResult.Value;
 
-            return new GetProductResponse(MapItem(item));
+            return new GetProductResponse(MapProduct(product));
         }
 
-        private ProductDto MapItem(Product item)
+        private ProductDto MapProduct(Product product)
         {
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
+            if (product == null)
+                throw new ArgumentNullException(nameof(product));
 
             return new ProductDto()
             {
-                Id = item.Id,
-                IsArchive = item.IsArchive,
-                MeasureType = item.MeasureType.ToString(),
-                Name = item.Name,
+                Id = product.Id,
+                IsArchive = product.IsArchive,
+                MeasureType = product.MeasureType.ToString(),
+                Name = product.Name,
             };
         }
     }

@@ -4,9 +4,9 @@ namespace Products.Core.Application.UseCases.Query.GetProduct
 {
     public class GetProductResponse
     {
-        public GetProductResponse(ProductDto item)
+        public GetProductResponse(ProductDto product)
         {
-            Product = item;
+            Product = product;
         }
         public ProductDto Product { get; set; } = new ProductDto();
     }

@@ -29,9 +29,11 @@ namespace Products.Api.Adapters.http.v1
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
         public async Task<IActionResult> AddItem([FromBody] NewProduct newItem)
         {
-            var addItemCommand = new AddProductCommand(newItem.Name, newItem.MeasureType);
+            var addItemCommand = AddProductCommand.Create(newItem.Name, newItem.MeasureTypeId);
+            if (!addItemCommand.IsSuccess)
+                return Conflict(addItemCommand.Error);
 
-            var response = await _mediator.Send(addItemCommand);
+            var response = await _mediator.Send(addItemCommand.Value);
 
             if (response.IsSuccess)
                 return Ok();
@@ -48,9 +50,11 @@ namespace Products.Api.Adapters.http.v1
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
         public async Task<IActionResult> ArchiveItem(Guid productId)
         {
-            var ArchiveItemCommand = new ArchiveProductCommand(productId);
+            var archiveItemCommand = ArchiveProductCommand.Create(productId);
+            if (!archiveItemCommand.IsSuccess)
+                return Conflict(archiveItemCommand.Error);
 
-            var response = await _mediator.Send(ArchiveItemCommand);
+            var response = await _mediator.Send(archiveItemCommand.Value);
 
             if (response.IsSuccess)
                 return Ok();
@@ -104,9 +108,12 @@ namespace Products.Api.Adapters.http.v1
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
         public async Task<IActionResult> GetProduct(Guid productId)
         {
-            var getItemQuery = new GetProductQuery(productId);
+            var getItemQueryCreateResult = GetProductQuery.Create(productId);
 
-            var response = await _mediator.Send(getItemQuery);
+            if (!getItemQueryCreateResult.IsSuccess)
+                return Conflict(getItemQueryCreateResult.Error);
+
+            var response = await _mediator.Send(getItemQueryCreateResult.Value);
 
             if (response.HasNoValue)
                 return NotFound();

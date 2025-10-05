@@ -30,8 +30,8 @@ namespace Products.Api.Adapters.http.v1
         public async Task<IActionResult> AddItem([FromBody] NewProduct newItem)
         {
             var addItemCommand = AddProductCommand.Create(newItem.Name, newItem.MeasureTypeId);
-            if (!addItemCommand.IsSuccess)
-                return Conflict(addItemCommand.Error);
+            if (addItemCommand.IsFailure)
+                return BadRequest(addItemCommand.Error);
 
             var response = await _mediator.Send(addItemCommand.Value);
 
@@ -51,8 +51,8 @@ namespace Products.Api.Adapters.http.v1
         public async Task<IActionResult> ArchiveItem(Guid productId)
         {
             var archiveItemCommand = ArchiveProductCommand.Create(productId);
-            if (!archiveItemCommand.IsSuccess)
-                return Conflict(archiveItemCommand.Error);
+            if (archiveItemCommand.IsFailure)
+                return BadRequest(archiveItemCommand.Error);
 
             var response = await _mediator.Send(archiveItemCommand.Value);
 
@@ -71,9 +71,12 @@ namespace Products.Api.Adapters.http.v1
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "Ошибка")]
         public async Task<IActionResult> UnArchiveItem(Guid productId)
         {
-            var UnArchiveItemCommand = new UnArchiveProductCommand(productId);
+            var UnArchiveItemCommand = UnArchiveProductCommand.Create(productId);
 
-            var response = await _mediator.Send(UnArchiveItemCommand);
+            if (UnArchiveItemCommand.IsFailure)
+                return BadRequest(UnArchiveItemCommand.Error);
+
+            var response = await _mediator.Send(UnArchiveItemCommand.Value);
 
             if (response.IsSuccess)
                 return Ok();
@@ -110,8 +113,8 @@ namespace Products.Api.Adapters.http.v1
         {
             var getItemQueryCreateResult = GetProductQuery.Create(productId);
 
-            if (!getItemQueryCreateResult.IsSuccess)
-                return Conflict(getItemQueryCreateResult.Error);
+            if (getItemQueryCreateResult.IsFailure)
+                return BadRequest(getItemQueryCreateResult.Error);
 
             var response = await _mediator.Send(getItemQueryCreateResult.Value);
 

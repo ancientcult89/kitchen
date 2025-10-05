@@ -3,6 +3,7 @@ using Products.Core.Domain.Model.ProductAggregate;
 using Products.Core.Ports;
 using MediatR;
 using Primitives;
+using Products.Core.Errors.Domain;
 
 namespace Products.Core.Application.UseCases.Commands.UnArchiveProduct
 {
@@ -21,7 +22,7 @@ namespace Products.Core.Application.UseCases.Commands.UnArchiveProduct
             var unarchivedProductResult = await _productRepository.GetAsync(request.ProductId);
 
             if (unarchivedProductResult.HasNoValue)
-                return new Error("no.such.product", $"There is no products with ID: {request.ProductId}");
+                return ProductErrors.ProductIsNotExists(request.ProductId);
 
             Product unarchiverProduct = unarchivedProductResult.Value;
 

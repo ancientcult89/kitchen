@@ -1,8 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentAssertions;
-using MediatR;
 using NSubstitute;
-using Primitives;
 using Products.Core.Application.Dto.ProductAggregate;
 using Products.Core.Application.UseCases.Query.GetProduct;
 using Products.Core.Domain.Model.ProductAggregate;
@@ -28,7 +26,9 @@ namespace Products.UnitTests.Domain.Application.GetProductQueryTests
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var item = Product.Create("Test Item", MeasureType.Liquid).Value;
+            var productName = ProductName.Create("Test Item").Value;
+
+            var item = Product.Create(productName, MeasureType.Liquid).Value;
 
             // Используем reflection для установки Id, так как он private set
             var idProperty = typeof(Product).GetProperty("Id");
@@ -48,9 +48,9 @@ namespace Products.UnitTests.Domain.Application.GetProductQueryTests
             Assert.NotNull(result.Value);
 
             Assert.Equal(item.Id, result.Value.Product.Id);
-            Assert.Equal(item.Name, result.Value.Product.Name);
+            Assert.Equal(item.Name.Value, result.Value.Product.Name);
             Assert.Equal(item.IsArchive, result.Value.Product.IsArchive);
-            Assert.Equal(item.MeasureType.ToString(), result.Value.Product.MeasureType);
+            Assert.Equal(item.MeasureType.Id, result.Value.Product.MeasureTypeId);
 
             await _mockRepository.Received(1).GetAsync(itemId);
         }
@@ -109,50 +109,13 @@ namespace Products.UnitTests.Domain.Application.GetProductQueryTests
         }
 
         [Fact]
-        public void MapItem_CorrectlyMapsItemToItemDto()
-        {
-            // Arrange
-            var item = Product.Create("Test Item", MeasureType.Liquid).Value;
-
-            // Используем reflection для вызова private метода
-            var handlerType = _handler.GetType();
-            var mapItemMethod = handlerType.GetMethod("MapProduct",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            // Act
-            var result = (ProductDto)mapItemMethod.Invoke(_handler, new object[] { item });
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(item.Id, result.Id);
-            Assert.Equal(item.Name, result.Name);
-            Assert.Equal(item.IsArchive, result.IsArchive);
-            Assert.Equal(item.MeasureType.ToString(), result.MeasureType);
-        }
-
-        [Fact]
-        public void MapItem_WhenItemIsNull_ThrowsArgumentNullException()
-        {
-            // Arrange
-            // Используем reflection для вызова private метода
-            var handlerType = _handler.GetType();
-            var mapItemMethod = handlerType.GetMethod("MapProduct",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            // Act & Assert
-            var exception = Assert.Throws<TargetInvocationException>(() =>
-                mapItemMethod.Invoke(_handler, new object[] { null }));
-
-            Assert.IsType<ArgumentNullException>(exception.InnerException);
-            Assert.Equal("product", ((ArgumentNullException)exception.InnerException).ParamName);
-        }
-
-        [Fact]
         public async Task Handle_WhenItemIsArchived_ReturnsCorrectArchiveStatus()
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var item = Product.Create("Archived Item", MeasureType.Weight).Value;
+            var productName = ProductName.Create("Archived Item").Value;
+
+            var item = Product.Create(productName, MeasureType.Weight).Value;
 
             // Архивируем элемент
             item.MakeArchive();
@@ -176,7 +139,8 @@ namespace Products.UnitTests.Domain.Application.GetProductQueryTests
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var item = Product.Create("Test Item", MeasureType.Weight).Value;
+            var productName = ProductName.Create("Test Item").Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
 
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);
@@ -188,7 +152,7 @@ namespace Products.UnitTests.Domain.Application.GetProductQueryTests
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(MeasureType.Weight.ToString(), result.Value.Product.MeasureType);
+            Assert.Equal(MeasureType.Weight.Id, result.Value.Product.MeasureTypeId);
             await _mockRepository.Received(1).GetAsync(itemId);
         }
 
@@ -197,7 +161,8 @@ namespace Products.UnitTests.Domain.Application.GetProductQueryTests
         {
             // Arrange
             var itemId = Guid.NewGuid();
-            var item = Product.Create("Test Item", MeasureType.Weight).Value;
+            var productName = ProductName.Create("Test Item").Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
 
             var repositoryResponse = Maybe.From(item);
             _mockRepository.GetAsync(itemId).Returns(repositoryResponse);

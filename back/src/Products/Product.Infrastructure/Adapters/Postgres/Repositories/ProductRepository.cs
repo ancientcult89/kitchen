@@ -1,7 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
+using Primitives;
 using Products.Core.Application.UseCases.Commands.AddProduct;
 using Products.Core.Domain.Model.ProductAggregate;
+using Products.Core.Errors.Application;
 using Products.Core.Ports;
 
 namespace Products.Infrastructure.Adapters.Postgres.Repositories
@@ -18,15 +20,15 @@ namespace Products.Infrastructure.Adapters.Postgres.Repositories
             await _dbContext.Products.AddAsync(item);
         }
 
-        public bool CheckDuplicate(AddProductCommand request)
+        public Result<bool, Error> IsDuplicate(AddProductCommand request)
         {
-            var normalizedRequestName = request.Name.Trim();
-            var measureTypeId = request.MeasureTypeId;
+            if (request == null)
+                return CQSErrors.IncorrectCommand();
 
-            // Один EF запрос с проверкой MeasureType на стороне БД
             return _dbContext.Products
-                .Where(i => EF.Functions.ILike(i.Name, normalizedRequestName) &&
-                            i.MeasureType.Id == measureTypeId)
+                .Include(p => p.MeasureType)
+                .Where(p => p.Name.Value.ToLower() == request.Name.Value.ToLowerInvariant() &&
+                            p.MeasureType == request.MeasureType)
                 .Any();
         }
 

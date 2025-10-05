@@ -1,30 +1,34 @@
 ﻿using CSharpFunctionalExtensions;
 using MediatR;
 using Primitives;
+using Products.Core.Domain.Model.ProductAggregate;
 using Products.Core.Domain.Model.SharedKernel;
 
 namespace Products.Core.Application.UseCases.Commands.AddProduct
 {
     public class AddProductCommand : IRequest<UnitResult<Error>>
     {
-        private AddProductCommand(string name, int measureTypeId)
+        private AddProductCommand(ProductName name, MeasureType measureType)
         {
             Name = name;
-            MeasureTypeId = measureTypeId;
+            MeasureType = measureType;
         }
 
         public static Result<AddProductCommand, Error> Create(string name, int measureTypeId)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return GeneralErrors.ValueIsRequired(nameof(name));
+            var productName = ProductName.Create(name);
 
-            if (!MeasureType.List().Select(mt => mt.Id).Contains(measureTypeId))
-                return GeneralErrors.ValueIsNotInRange(nameof(measureTypeId), MeasureType.Weight.Id, MeasureType.Liquid.Id);
+            if (!productName.IsSuccess)
+                return productName.Error;
 
-            return new AddProductCommand(name, measureTypeId);
+            var measureType = MeasureType.CreateFromId(measureTypeId);
+            if(!measureType.IsSuccess)
+                return measureType.Error;
+
+            return new AddProductCommand(productName.Value, measureType.Value);
         }
 
-        public string Name { get; set; }
-        public int MeasureTypeId { get; set; }
+        public ProductName Name { get; set; }
+        public MeasureType MeasureType { get; set; }
     }
 }

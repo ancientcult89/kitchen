@@ -1,8 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using Products.Core.Domain.Model.ProductAggregate;
-using Products.Core.Ports;
 using MediatR;
 using Primitives;
+using Products.Core.Domain.Model.ProductAggregate;
+using Products.Core.Errors.Domain;
+using Products.Core.Ports;
 
 namespace Products.Core.Application.UseCases.Commands.ArchiveProduct
 {
@@ -21,7 +22,7 @@ namespace Products.Core.Application.UseCases.Commands.ArchiveProduct
             var archivedItemResult = await _itemRepository.GetAsync(request.ProductId);
 
             if (archivedItemResult.HasNoValue)
-                return new Error("no.such.item", $"There is no items with ID: {request.ProductId}");
+                return ProductErrors.ProductIsNotExists(request.ProductId);
 
             Product archivedItem = archivedItemResult.Value;
             var result = archivedItem.MakeArchive();

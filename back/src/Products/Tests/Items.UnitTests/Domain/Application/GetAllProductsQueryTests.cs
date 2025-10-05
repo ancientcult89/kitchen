@@ -1,11 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentAssertions;
+using NSubstitute;
 using Products.Core.Application.Dto.ProductAggregate;
 using Products.Core.Application.UseCases.Query.GetAllProducts;
 using Products.Core.Domain.Model.ProductAggregate;
 using Products.Core.Domain.Model.SharedKernel;
 using Products.Core.Ports;
-using NSubstitute;
 
 namespace Products.UnitTests.Domain.Application
 {
@@ -24,11 +24,14 @@ namespace Products.UnitTests.Domain.Application
         public async Task Handle_WhenItemsExist_ReturnsGetAllItemsResponse()
         {
             // Arrange
+            var productName1 = ProductName.Create("Item 1").Value;
+            var productName2 = ProductName.Create("Item 2").Value;
+
             var items = new List<Product>
-            {
-                Product.Create("Item 1", MeasureType.Liquid).Value,
-                Product.Create("Item 2", MeasureType.Weight).Value
-            };
+    {
+        Product.Create(productName1, MeasureType.Liquid).Value,
+        Product.Create(productName2, MeasureType.Weight).Value
+    };
 
             var repositoryResponse = Maybe.From<List<Product>>(items);
             _mockRepository.GetAllAsync().Returns(repositoryResponse);
@@ -46,9 +49,9 @@ namespace Products.UnitTests.Domain.Application
 
             var firstItem = result.Value.Products[0];
             Assert.Equal(items[0].Id, firstItem.Id);
-            Assert.Equal(items[0].Name, firstItem.Name);
+            Assert.Equal(items[0].Name.Value, firstItem.Name); // Используем .Value для ProductName
             Assert.Equal(items[0].IsArchive, firstItem.IsArchive);
-            Assert.Equal(items[0].MeasureType.ToString(), firstItem.MeasureType);
+            Assert.Equal(items[0].MeasureType.Id, firstItem.MeasureTypeId); // Используем Id вместо Name
 
             await _mockRepository.Received(1).GetAllAsync();
         }
@@ -105,43 +108,19 @@ namespace Products.UnitTests.Domain.Application
         }
 
         [Fact]
-        public void MapItems_CorrectlyMapsItemToItemDto()
+        public async Task Handle_WhenItemsHaveDifferentMeasureTypes_ReturnsCorrectMeasureTypeId()
         {
             // Arrange
+            var productName1 = ProductName.Create("Item 1").Value;
+            var productName2 = ProductName.Create("Item 2").Value;
+            var productName3 = ProductName.Create("Item 3").Value;
+
             var items = new List<Product>
-            {
-                Product.Create("Test Item", MeasureType.Liquid).Value
-            };
-
-            // Используем reflection для вызова private метода
-            var handlerType = _handler.GetType();
-            var mapItemsMethod = handlerType.GetMethod("MapProducts",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            // Act
-            var result = (List<ProductDto>)mapItemsMethod.Invoke(_handler, new object[] { items });
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Single(result);
-
-            var itemDto = result[0];
-            Assert.Equal(items[0].Id, itemDto.Id);
-            Assert.Equal(items[0].Name, itemDto.Name);
-            Assert.Equal(items[0].IsArchive, itemDto.IsArchive);
-            Assert.Equal(items[0].MeasureType.ToString(), itemDto.MeasureType);
-        }
-
-        [Fact]
-        public async Task Handle_WhenItemsHaveDifferentMeasureTypes_ReturnsCorrectStringRepresentation()
-        {
-            // Arrange
-            var items = new List<Product>
-        {
-            Product.Create("Item 1", MeasureType.Weight).Value,
-            Product.Create("Item 2", MeasureType.Liquid).Value,
-            Product.Create("Item 3", MeasureType.Weight).Value
-        };
+    {
+        Product.Create(productName1, MeasureType.Weight).Value,
+        Product.Create(productName2, MeasureType.Liquid).Value,
+        Product.Create(productName3, MeasureType.Weight).Value
+    };
 
             var repositoryResponse = Maybe.From<List<Product>>(items);
             _mockRepository.GetAllAsync().Returns(repositoryResponse);
@@ -154,17 +133,20 @@ namespace Products.UnitTests.Domain.Application
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Value.Products.Count);
-            Assert.Equal(MeasureType.Weight.ToString(), result.Value.Products[0].MeasureType);
-            Assert.Equal(MeasureType.Liquid.ToString(), result.Value.Products[1].MeasureType);
-            Assert.Equal(MeasureType.Weight.ToString(), result.Value.Products[2].MeasureType);
+            Assert.Equal(MeasureType.Weight.Id, result.Value.Products[0].MeasureTypeId);
+            Assert.Equal(MeasureType.Liquid.Id, result.Value.Products[1].MeasureTypeId);
+            Assert.Equal(MeasureType.Weight.Id, result.Value.Products[2].MeasureTypeId);
         }
 
         [Fact]
         public async Task Handle_WhenItemsHaveArchiveStatus_ReturnsCorrectArchiveStatus()
         {
             // Arrange
-            var item1 = Product.Create("Active Item", MeasureType.Liquid).Value;
-            var item2 = Product.Create("Archived Item", MeasureType.Weight).Value;
+            var productName1 = ProductName.Create("Active Item").Value;
+            var productName2 = ProductName.Create("Archived Item").Value;
+
+            var item1 = Product.Create(productName1, MeasureType.Liquid).Value;
+            var item2 = Product.Create(productName2, MeasureType.Weight).Value;
 
             // Архивируем второй элемент
             item2.MakeArchive();
@@ -190,10 +172,11 @@ namespace Products.UnitTests.Domain.Application
         public async Task Handle_WhenCalled_CallsRepositoryOnce()
         {
             // Arrange
+            var productName = ProductName.Create("Item 1").Value;
             var items = new List<Product>
-        {
-            Product.Create("Item 1", MeasureType.Liquid).Value
-        };
+    {
+        Product.Create(productName, MeasureType.Liquid).Value
+    };
 
             var repositoryResponse = Maybe.From<List<Product>>(items);
             _mockRepository.GetAllAsync().Returns(repositoryResponse);
@@ -211,10 +194,11 @@ namespace Products.UnitTests.Domain.Application
         public async Task Handle_WithCancellationToken_PropagatesTokenToRepository()
         {
             // Arrange
+            var productName = ProductName.Create("Item 1").Value;
             var items = new List<Product>
-        {
-            Product.Create("Item 1", MeasureType.Liquid).Value
-        };
+    {
+        Product.Create(productName, MeasureType.Liquid).Value
+    };
 
             var repositoryResponse = Maybe.From<List<Product>>(items);
             _mockRepository.GetAllAsync().Returns(repositoryResponse);
@@ -227,6 +211,86 @@ namespace Products.UnitTests.Domain.Application
 
             // Assert
             await _mockRepository.Received(1).GetAllAsync();
+        }
+
+        [Fact]
+        public async Task Handle_WhenProductsHaveSpecialCharactersInName_ReturnsCorrectName()
+        {
+            // Arrange
+            var productName1 = ProductName.Create("Item with spaces").Value;
+            var productName2 = ProductName.Create("Item-with-dashes").Value;
+            var productName3 = ProductName.Create("Item_with_underscores").Value;
+
+            var items = new List<Product>
+    {
+        Product.Create(productName1, MeasureType.Weight).Value,
+        Product.Create(productName2, MeasureType.Liquid).Value,
+        Product.Create(productName3, MeasureType.Weight).Value
+    };
+
+            var repositoryResponse = Maybe.From<List<Product>>(items);
+            _mockRepository.GetAllAsync().Returns(repositoryResponse);
+
+            var query = new GetAllProductsQuery();
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Value.Products.Count);
+            Assert.Equal("Item with spaces", result.Value.Products[0].Name);
+            Assert.Equal("Item-with-dashes", result.Value.Products[1].Name);
+            Assert.Equal("Item_with_underscores", result.Value.Products[2].Name);
+        }
+
+        [Fact]
+        public async Task Handle_WhenProductsHaveDifferentCaseInNames_ReturnsOriginalCase()
+        {
+            // Arrange
+            var productName1 = ProductName.Create("ITEM IN UPPERCASE").Value;
+            var productName2 = ProductName.Create("item in lowercase").Value;
+            var productName3 = ProductName.Create("Item In Mixed Case").Value;
+
+            var items = new List<Product>
+    {
+        Product.Create(productName1, MeasureType.Weight).Value,
+        Product.Create(productName2, MeasureType.Liquid).Value,
+        Product.Create(productName3, MeasureType.Weight).Value
+    };
+
+            var repositoryResponse = Maybe.From<List<Product>>(items);
+            _mockRepository.GetAllAsync().Returns(repositoryResponse);
+
+            var query = new GetAllProductsQuery();
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Value.Products.Count);
+            Assert.Equal("ITEM IN UPPERCASE", result.Value.Products[0].Name);
+            Assert.Equal("item in lowercase", result.Value.Products[1].Name);
+            Assert.Equal("Item In Mixed Case", result.Value.Products[2].Name);
+        }
+
+        [Fact]
+        public void ProductExtension_ToDto_MapsCorrectly()
+        {
+            // Arrange
+            var productName = ProductName.Create("Test Product").Value;
+            var product = Product.Create(productName, MeasureType.Liquid).Value;
+
+            // Act
+            var dto = product.ToDto();
+
+            // Assert
+            Assert.NotNull(dto);
+            Assert.Equal(product.Id, dto.Id);
+            Assert.Equal(product.Name.Value, dto.Name);
+            Assert.Equal(product.IsArchive, dto.IsArchive);
+            Assert.Equal(product.MeasureType.Id, dto.MeasureTypeId);
         }
     }
 }

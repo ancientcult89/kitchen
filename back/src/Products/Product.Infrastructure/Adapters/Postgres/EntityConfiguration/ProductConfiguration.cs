@@ -17,9 +17,26 @@ namespace Products.Infrastructure.Adapters.Postgres.EntityConfiguration
                 .HasColumnName("id")
                 .IsRequired();
 
-            builder.Property(entity => entity.Name)
-                .HasColumnName("name")
-                .IsRequired();
+            // Value Object: ProductName - сохраняем как собственную колонку
+            builder.OwnsOne(p => p.Name, a =>
+            {
+                a.Property(u => u.Value)
+                    .HasColumnName("name")
+                    .HasColumnType("text")
+                    .IsRequired();
+
+                // Индекс для owned property
+                a.HasIndex(u => u.Value)
+                    .HasDatabaseName("IX_products_name");
+            });
+            //builder.Property(p => p.Name)
+            //    .HasConversion(
+            //        name => name.Value, // При сохранении: берем строковое значение
+            //        value => ProductName.Create(value).Value) // При чтении: создаем Value Object
+            //    .HasColumnName("Name")
+            //    .HasColumnType("text")
+            //    .HasMaxLength(255) // Укажите подходящую максимальную длину
+            //    .IsRequired();
 
             builder.Property(entity => entity.IsArchive)
                 .HasColumnName("is_archive")
@@ -39,6 +56,13 @@ namespace Products.Infrastructure.Adapters.Postgres.EntityConfiguration
             // Важно: говорим EF, что MeasureType не нужно отслеживать изменения
             builder.Navigation(entity => entity.MeasureType)
                 .AutoInclude(false); // Отключаем автоматическую загрузку
+
+            //// Индексы (опционально)
+            //builder.HasIndex(p => p.Name)
+            //    .HasDatabaseName("IX_Products_Name");
+
+            builder.HasIndex(p => p.IsArchive)
+                .HasDatabaseName("IX_Products_IsArchive");
         }
     }
 }

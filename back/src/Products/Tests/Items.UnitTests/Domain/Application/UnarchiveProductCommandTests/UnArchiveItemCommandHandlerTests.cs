@@ -6,6 +6,7 @@ using Products.Core.Ports;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Primitives;
+using Products.Core.Errors.Domain;
 
 namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
 {
@@ -28,8 +29,9 @@ namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = UnArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var item = Product.Create("Test Item", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
             // Сначала архивируем, чтобы потом разархивировать
             item.MakeArchive();
 
@@ -58,7 +60,7 @@ namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
 
             // Assert
             result.IsFailure.Should().BeTrue();
-            result.Error.Code.Should().Be("no.such.product");
+            result.Error.Code.Should().Be(ProductErrors.ProductIsNotExists(itemId).Code);
             result.Error.Message.Should().Contain(itemId.ToString());
 
             _itemRepository.DidNotReceive().Update(Arg.Any<Product>());
@@ -71,9 +73,11 @@ namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = UnArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Item").Value;
 
             // Создаем неархивированный item
-            var item = Product.Create("Test Item", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
+
 
             _itemRepository.GetAsync(itemId).Returns(item);
 
@@ -111,8 +115,9 @@ namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = UnArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var item = Product.Create("Test Item", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
             item.MakeArchive(); // Архивируем для разархивации
             _itemRepository.GetAsync(itemId).Returns(item);
 
@@ -133,8 +138,9 @@ namespace Products.UnitTests.Domain.Application.UnarchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = UnArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var item = Product.Create("Test Item", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
             item.MakeArchive(); // Архивируем для разархивации
             _itemRepository.GetAsync(itemId).Returns(item);
 

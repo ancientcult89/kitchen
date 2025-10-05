@@ -55,9 +55,19 @@ namespace Products.Infrastructure.Adapters.Postgres.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_IsArchive",
+                table: "products",
+                column: "is_archive");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_products_measure_type_id",
                 table: "products",
                 column: "measure_type_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_products_name",
+                table: "products",
+                column: "name");
         }
 
         /// <inheritdoc />

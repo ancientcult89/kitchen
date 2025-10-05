@@ -12,8 +12,8 @@ using Products.Infrastructure.Adapters.Postgres;
 namespace Products.Infrastructure.Adapters.Postgres.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250925150311_Init")]
-    partial class Init
+    [Migration("20251003132752_Outbox")]
+    partial class Outbox
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,16 +35,14 @@ namespace Products.Infrastructure.Adapters.Postgres.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_archive");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
                     b.Property<int>("measure_type_id")
                         .HasColumnType("integer")
                         .HasColumnName("measure_type_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsArchive")
+                        .HasDatabaseName("IX_Products_IsArchive");
 
                     b.HasIndex("measure_type_id");
 
@@ -80,6 +78,35 @@ namespace Products.Infrastructure.Adapters.Postgres.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Products.Infrastructure.Adapters.Postgres.Entities.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("OccurredOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_on_utc");
+
+                    b.Property<DateTime?>("ProcessedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_on_utc");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("outbox", (string)null);
+                });
+
             modelBuilder.Entity("Products.Core.Domain.Model.ProductAggregate.Product", b =>
                 {
                     b.HasOne("Products.Core.Domain.Model.SharedKernel.MeasureType", "MeasureType")
@@ -88,7 +115,31 @@ namespace Products.Infrastructure.Adapters.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.OwnsOne("Products.Core.Domain.Model.ProductAggregate.ProductName", "Name", b1 =>
+                        {
+                            b1.Property<Guid>("ProductId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("name");
+
+                            b1.HasKey("ProductId");
+
+                            b1.HasIndex("Value")
+                                .HasDatabaseName("IX_products_name");
+
+                            b1.ToTable("products");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
+                        });
+
                     b.Navigation("MeasureType");
+
+                    b.Navigation("Name")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

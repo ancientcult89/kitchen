@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using Primitives;
 using Products.Core.Application.UseCases.Commands.AddProduct;
 using Products.Core.Domain.Model.ProductAggregate;
 
@@ -18,7 +19,7 @@ namespace Products.Core.Ports
         /// </summary>
         /// <param name="request"></param>
         /// <returns>истина, если есть аналогичный</returns>
-        bool CheckDuplicate(AddProductCommand request);
+        Result<bool, Error> IsDuplicate(AddProductCommand request);
 
         /// <summary>
         /// Получить продуктовую единицу

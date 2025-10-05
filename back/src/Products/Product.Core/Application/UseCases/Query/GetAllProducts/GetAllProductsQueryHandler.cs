@@ -1,8 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
-using Products.Core.Application.Dto.ProductAggregate;
-using Products.Core.Domain.Model.ProductAggregate;
-using Products.Core.Ports;
 using MediatR;
+using Products.Core.Application.Dto.ProductAggregate;
+using Products.Core.Ports;
 
 namespace Products.Core.Application.UseCases.Query.GetAllProducts
 {
@@ -23,25 +22,7 @@ namespace Products.Core.Application.UseCases.Query.GetAllProducts
             if (result.Value.Count == 0)
                 return null;
 
-            return new GetAllProductsResponse(MapProducts(result.Value));
-        }
-
-        private List<ProductDto> MapProducts(List<Product> result)
-        {
-            var products = new List<ProductDto>();
-            foreach (var product in result)
-            {
-                var productDto = new ProductDto()
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    IsArchive = product.IsArchive,
-                    MeasureType = product.MeasureType.ToString(),
-                };
-                products.Add(productDto);
-            }
-
-            return products;
+            return new GetAllProductsResponse(result.Value.Select(p => p.ToDto()).ToList());
         }
     }
 }

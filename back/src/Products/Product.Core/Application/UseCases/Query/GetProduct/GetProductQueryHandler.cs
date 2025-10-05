@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using MediatR;
+using Primitives;
 using Products.Core.Application.Dto.ProductAggregate;
-using Products.Core.Domain.Model.ProductAggregate;
 using Products.Core.Ports;
 
 namespace Products.Core.Application.UseCases.Query.GetProduct
@@ -15,6 +15,9 @@ namespace Products.Core.Application.UseCases.Query.GetProduct
         }
         public async Task<Maybe<GetProductResponse>> Handle(GetProductQuery request, CancellationToken cancellationToken)
         {
+            if(request.ProductId == Guid.Empty)
+                return null;
+
             var getProductResult = await _productRepository.GetAsync(request.ProductId);
 
             if (getProductResult.HasNoValue)
@@ -22,21 +25,7 @@ namespace Products.Core.Application.UseCases.Query.GetProduct
 
             var product = getProductResult.Value;
 
-            return new GetProductResponse(MapProduct(product));
-        }
-
-        private ProductDto MapProduct(Product product)
-        {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
-
-            return new ProductDto()
-            {
-                Id = product.Id,
-                IsArchive = product.IsArchive,
-                MeasureType = product.MeasureType.ToString(),
-                Name = product.Name,
-            };
+            return new GetProductResponse(product.ToDto());
         }
     }
 }

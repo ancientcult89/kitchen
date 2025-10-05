@@ -6,6 +6,7 @@ using Products.Core.Ports;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Primitives;
+using Products.Core.Errors.Domain;
 
 namespace Products.UnitTests.Domain.Application.ArchiveProductCommandTests
 {
@@ -28,8 +29,9 @@ namespace Products.UnitTests.Domain.Application.ArchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = ArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Product").Value;
 
-            var item = Product.Create("Test Product", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
 
             // Act
@@ -55,7 +57,7 @@ namespace Products.UnitTests.Domain.Application.ArchiveProductCommandTests
 
             // Assert
             result.IsFailure.Should().BeTrue();
-            result.Error.Code.Should().Be("no.such.item");
+            result.Error.Code.Should().Be(ProductErrors.ProductIsNotExists(itemId).Code);
             result.Error.Message.Should().Contain(itemId.ToString());
 
             _itemRepository.DidNotReceive().Update(Arg.Any<Product>());
@@ -84,8 +86,9 @@ namespace Products.UnitTests.Domain.Application.ArchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = ArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Product").Value;
 
-            var item = Product.Create("Test Product", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
             _unitOfWork.When(x => x.SaveChangesAsync())
                 .Do(x => throw new InvalidOperationException("Save failed"));
@@ -104,8 +107,9 @@ namespace Products.UnitTests.Domain.Application.ArchiveProductCommandTests
             // Arrange
             var itemId = Guid.NewGuid();
             var command = ArchiveProductCommand.Create(itemId).Value;
+            var productName = ProductName.Create("Test Product").Value;
 
-            var item = Product.Create("Test Product", MeasureType.Weight).Value;
+            var item = Product.Create(productName, MeasureType.Weight).Value;
             _itemRepository.GetAsync(itemId).Returns(item);
 
             var callOrder = 0;

@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using Primitives;
+using Products.Core.Errors.Domain;
 
 namespace Products.Core.Domain.Model.SharedKernel
 {
@@ -34,7 +35,7 @@ namespace Products.Core.Domain.Model.SharedKernel
 
             if (state == null)
             {
-                return new Error("unknown.measure.type", $"Possible values for {nameof(MeasureType)}: {string.Join(",", List().Select(s => s.Name))}");
+                return MeasureTypeErrors.UnknownType();
             }
 
             return state;
@@ -46,7 +47,7 @@ namespace Products.Core.Domain.Model.SharedKernel
 
             if (state == null)
             {
-                return new Error("unknown.measure.type", $"Possible values for {nameof(MeasureType)}: {string.Join(",", List().Select(s => s.Name))}");
+                return MeasureTypeErrors.UnknownType();
             }
 
             return state;

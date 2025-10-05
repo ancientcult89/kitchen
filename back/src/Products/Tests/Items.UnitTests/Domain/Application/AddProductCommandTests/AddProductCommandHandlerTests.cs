@@ -5,6 +5,7 @@ using Products.Core.Domain.Model.SharedKernel;
 using Products.Core.Ports;
 using NSubstitute;
 using Primitives;
+using Products.Core.Errors.Application;
 
 namespace Products.UnitTests.Domain.Application.AddProductCommandTests
 {
@@ -27,7 +28,7 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             // Arrange
             var command = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
-            _itemRepository.CheckDuplicate(Arg.Any<AddProductCommand>()).Returns(false);
+            _itemRepository.IsDuplicate(Arg.Any<AddProductCommand>()).Returns(false);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -44,7 +45,7 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             // Arrange
             var command = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
-            _itemRepository.CheckDuplicate(Arg.Any<AddProductCommand>()).Returns(true);
+            _itemRepository.IsDuplicate(Arg.Any<AddProductCommand>()).Returns(true);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -64,7 +65,7 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             // Arrange
             var command = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
-            _itemRepository.CheckDuplicate(Arg.Any<AddProductCommand>()).Returns(false);
+            _itemRepository.IsDuplicate(Arg.Any<AddProductCommand>()).Returns(false);
             _itemRepository.When(x => x.AddAsync(Arg.Any<Product>()))
                 .Do(x => throw new InvalidOperationException("Database error"));
 
@@ -83,27 +84,12 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             var measureType = MeasureType.Weight;
 
             // Act
-            var error = AddProductCommandHandler.Errors.ItemWithSameNameAndMeasureTypeExists(name, measureType);
+            var error = AddProductErrors.ItemWithSameNameAndMeasureTypeExists(name, measureType);
 
             // Assert
             error.Should().NotBeNull();
             error.Code.Should().Be("product.unique.violation");
             error.Message.Should().Be($"Product with name '{name}' and measure type '{measureType}' already exists");
-        }
-
-        [Fact]
-        public void Errors_ItemWithIdAlreadyExists_ShouldReturnCorrectError()
-        {
-            // Arrange
-            var itemId = Guid.NewGuid();
-
-            // Act
-            var error = AddProductCommandHandler.Errors.ItemWithIdAlreadyExists(itemId);
-
-            // Assert
-            error.Should().NotBeNull();
-            error.Code.Should().Be("product.id.already.exists");
-            error.Message.Should().Be($"Product with ID {itemId} already exists in the collection");
         }
     }
 }

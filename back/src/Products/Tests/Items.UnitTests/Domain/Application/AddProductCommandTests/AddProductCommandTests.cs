@@ -17,8 +17,8 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBeNull();
-            result.Value.Name.Should().Be(name);
-            result.Value.MeasureTypeId.Should().Be(measureTypeId);
+            result.Value.Name.Value.Should().Be(name);
+            result.Value.MeasureType.Id.Should().Be(measureTypeId);
         }
 
         [Theory]
@@ -37,7 +37,7 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             // Assert
             result.IsSuccess.Should().BeFalse();
             result.Error.Should().NotBeNull();
-            result.Error.Message.Should().Contain("Value is required for");
+            result.Error.Message.Should().Contain("Value is invalid for");
             result.Error.Message.Should().Contain("name");
         }
 
@@ -57,7 +57,7 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             // Assert
             result.IsSuccess.Should().BeFalse();
             result.Error.Should().NotBeNull();
-            result.Error.Message.Should().Contain("should be between 1 and 2");
+            result.Error.Message.Should().Contain("Possible values for MeasureType:");
         }
 
         [Fact]
@@ -75,36 +75,6 @@ namespace Products.UnitTests.Domain.Application.AddProductCommandTests
             result.Error.Should().NotBeNull();
             // Проверяем, что возвращается ошибка для первого невалидного параметра (name)
             result.Error.Message.Should().Contain("name");
-        }
-
-        [Fact]
-        public void ShouldCreateCommand_WithMinimumValidMeasureTypeId()
-        {
-            // Arrange
-            var name = "Test Product";
-            var minMeasureTypeId = MeasureType.List().Min(mt => mt.Id);
-
-            // Act
-            var result = AddProductCommand.Create(name, minMeasureTypeId);
-
-            // Assert
-            result.IsSuccess.Should().BeTrue();
-            result.Value.MeasureTypeId.Should().Be(minMeasureTypeId);
-        }
-
-        [Fact]
-        public void ShouldCreateCommand_WithMaximumValidMeasureTypeId()
-        {
-            // Arrange
-            var name = "Test Product";
-            var maxMeasureTypeId = MeasureType.List().Max(mt => mt.Id);
-
-            // Act
-            var result = AddProductCommand.Create(name, maxMeasureTypeId);
-
-            // Assert
-            result.IsSuccess.Should().BeTrue();
-            result.Value.MeasureTypeId.Should().Be(maxMeasureTypeId);
         }
     }
 }

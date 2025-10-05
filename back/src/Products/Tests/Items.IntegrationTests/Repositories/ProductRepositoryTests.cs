@@ -48,8 +48,10 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType = MeasureType.Weight;
+            string productStringName = "Product Item";
+            var productName = ProductName.Create(productStringName).Value;
 
-            var item = Product.Create("Test Item", measureType).Value;
+            var item = Product.Create(productName, measureType).Value;
 
             // Act
             await _repository.AddAsync(item);
@@ -60,8 +62,8 @@ namespace Products.IntegrationTests.Repositories
                 .Include(i => i.MeasureType)
                 .FirstOrDefaultAsync(i => i.Id == item.Id);
             Assert.NotNull(savedItem);
-            Assert.Equal("Test Item", savedItem.Name);
-            Assert.Equal("weight", savedItem.MeasureType.Name);
+            Assert.Equal(productStringName, savedItem.Name.Value);
+            Assert.Equal(MeasureType.Weight.Name, savedItem.MeasureType.Name);
         }
 
         [Fact]
@@ -69,8 +71,9 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType = MeasureType.Weight;
+            var productName = ProductName.Create("Duplicate Item").Value;
 
-            var existingItem = Product.Create("Duplicate Item", measureType).Value;
+            var existingItem = Product.Create(productName, measureType).Value;
 
             _context.Products.Add(existingItem);
             _context.SaveChanges();
@@ -78,10 +81,10 @@ namespace Products.IntegrationTests.Repositories
             var request = AddProductCommand.Create("Duplicate Item", MeasureType.Weight.Id).Value;
 
             // Act
-            var result = _repository.CheckDuplicate(request);
+            var result = _repository.IsDuplicate(request);
 
             // Assert
-            Assert.True(result);
+            Assert.True(result.Value);
         }
 
         [Fact]
@@ -89,8 +92,9 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType = MeasureType.Weight;
+            var productName = ProductName.Create("Existing Item").Value;
 
-            var existingItem = Product.Create("Existing Item", measureType).Value;
+            var existingItem = Product.Create(productName, measureType).Value;
 
             _context.Products.Add(existingItem);
             _context.SaveChanges();
@@ -98,10 +102,10 @@ namespace Products.IntegrationTests.Repositories
             var request = AddProductCommand.Create("Different Item", MeasureType.Weight.Id).Value;
 
             // Act
-            var result = _repository.CheckDuplicate(request);
+            var result = _repository.IsDuplicate(request);
 
             // Assert
-            Assert.False(result);
+            Assert.False(result.Value);
         }
 
         [Fact]
@@ -109,8 +113,9 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType1 = MeasureType.Weight;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var existingItem = Product.Create("Test Item", measureType1).Value;
+            var existingItem = Product.Create(productName, measureType1).Value;
 
             _context.Products.Add(existingItem);
             _context.SaveChanges();
@@ -118,10 +123,10 @@ namespace Products.IntegrationTests.Repositories
             var request = AddProductCommand.Create("Test Item", MeasureType.Liquid.Id).Value;
 
             // Act
-            var result = _repository.CheckDuplicate(request);
+            var result = _repository.IsDuplicate(request);
 
             // Assert
-            Assert.False(result);
+            Assert.False(result.Value);
         }
 
         [Fact]
@@ -129,8 +134,9 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType = MeasureType.Weight;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var existingItem = Product.Create("Test Item", measureType).Value;
+            var existingItem = Product.Create(productName, measureType).Value;
 
             _context.Products.Add(existingItem);
             _context.SaveChanges();
@@ -138,10 +144,10 @@ namespace Products.IntegrationTests.Repositories
             var request = AddProductCommand.Create("test item", MeasureType.Weight.Id).Value;
 
             // Act
-            var result = _repository.CheckDuplicate(request);
+            var result = _repository.IsDuplicate(request);
 
             // Assert
-            Assert.True(result); // Должно быть true, так как сравнение не чувствительно к регистру
+            Assert.True(result.Value); // Должно быть true, так как сравнение не чувствительно к регистру
         }
 
         [Fact]
@@ -150,12 +156,14 @@ namespace Products.IntegrationTests.Repositories
             // Arrange
             var measureType1 = MeasureType.Weight;
             var measureType2 = MeasureType.Liquid;
+            var productName1 = ProductName.Create("Item 1").Value;
+            var productName2 = ProductName.Create("Item 2").Value;
 
             var items = new List<Product>()
-        {
-            Product.Create("Item 1", measureType1).Value,
-            Product.Create("Item 2", measureType2).Value
-        };
+    {
+        Product.Create(productName1, measureType1).Value,
+        Product.Create(productName2, measureType2).Value
+    };
 
             await _context.Products.AddRangeAsync(items);
             await _context.SaveChangesAsync();
@@ -166,8 +174,8 @@ namespace Products.IntegrationTests.Repositories
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Value.Count);
-            Assert.Contains(result.Value, i => i.Name == "Item 1");
-            Assert.Contains(result.Value, i => i.Name == "Item 2");
+            Assert.Contains(result.Value, i => i.Name.Value == "Item 1");
+            Assert.Contains(result.Value, i => i.Name.Value == "Item 2");
         }
 
         [Fact]
@@ -186,8 +194,9 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType = MeasureType.Weight;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var item = Product.Create("Test Item", measureType).Value;
+            var item = Product.Create(productName, measureType).Value;
             await _context.Products.AddAsync(item);
             await _context.SaveChangesAsync();
 
@@ -197,7 +206,7 @@ namespace Products.IntegrationTests.Repositories
             // Assert
             result.HasValue.Should().BeTrue();
             Assert.Equal(item.Id, result.Value.Id);
-            Assert.Equal("Test Item", result.Value.Name);
+            Assert.Equal("Test Item", result.Value.Name.Value);
             Assert.Equal("weight", result.Value.MeasureType.Name);
         }
 
@@ -229,8 +238,9 @@ namespace Products.IntegrationTests.Repositories
         {
             // Arrange
             var measureType = MeasureType.Weight;
+            var productName = ProductName.Create("Test Item").Value;
 
-            var existingItem = Product.Create("Test Item", measureType).Value;
+            var existingItem = Product.Create(productName, measureType).Value;
 
             _context.Products.Add(existingItem);
             _context.SaveChanges();
@@ -238,10 +248,10 @@ namespace Products.IntegrationTests.Repositories
             var request = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 
             // Act
-            var result = _repository.CheckDuplicate(request);
+            var result = _repository.IsDuplicate(request);
 
             // Assert
-            Assert.True(result);
+            Assert.True(result.Value);
         }
     }
 }

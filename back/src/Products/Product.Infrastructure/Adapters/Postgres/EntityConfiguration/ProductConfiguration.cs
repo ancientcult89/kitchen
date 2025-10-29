@@ -29,14 +29,6 @@ namespace Products.Infrastructure.Adapters.Postgres.EntityConfiguration
                 a.HasIndex(u => u.Value)
                     .HasDatabaseName("IX_products_name");
             });
-            //builder.Property(p => p.Name)
-            //    .HasConversion(
-            //        name => name.Value, // При сохранении: берем строковое значение
-            //        value => ProductName.Create(value).Value) // При чтении: создаем Value Object
-            //    .HasColumnName("Name")
-            //    .HasColumnType("text")
-            //    .HasMaxLength(255) // Укажите подходящую максимальную длину
-            //    .IsRequired();
 
             builder.Property(entity => entity.IsArchive)
                 .HasColumnName("is_archive")
@@ -45,21 +37,9 @@ namespace Products.Infrastructure.Adapters.Postgres.EntityConfiguration
             // Важно: настраиваем связь и указываем, что MeasureType уже существует
             builder.HasOne(entity => entity.MeasureType)
                 .WithMany()
-                .HasForeignKey("measure_type_id")
                 .IsRequired()
+                .HasForeignKey("measure_type_id")
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Указываем свойство для внешнего ключа
-            builder.Property<int>("measure_type_id")
-                .HasColumnName("measure_type_id");
-
-            // Важно: говорим EF, что MeasureType не нужно отслеживать изменения
-            builder.Navigation(entity => entity.MeasureType)
-                .AutoInclude(false); // Отключаем автоматическую загрузку
-
-            //// Индексы (опционально)
-            //builder.HasIndex(p => p.Name)
-            //    .HasDatabaseName("IX_Products_Name");
 
             builder.HasIndex(p => p.IsArchive)
                 .HasDatabaseName("IX_Products_IsArchive");

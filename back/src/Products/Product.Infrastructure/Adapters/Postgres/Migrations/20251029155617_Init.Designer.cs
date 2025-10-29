@@ -12,8 +12,8 @@ using Products.Infrastructure.Adapters.Postgres;
 namespace Products.Infrastructure.Adapters.Postgres.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251003132752_Outbox")]
-    partial class Outbox
+    [Migration("20251029155617_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,8 +36,7 @@ namespace Products.Infrastructure.Adapters.Postgres.Migrations
                         .HasColumnName("is_archive");
 
                     b.Property<int>("measure_type_id")
-                        .HasColumnType("integer")
-                        .HasColumnName("measure_type_id");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

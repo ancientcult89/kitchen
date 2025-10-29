@@ -21,12 +21,6 @@ namespace Products.Infrastructure.Adapters.Postgres.EntityConfiguration
                 .HasColumnName("name")
                 .HasMaxLength(50)
                 .IsRequired();
-
-            // Заполняем таблицу предопределенными значениями
-            builder.HasData(
-                MeasureType.Weight,
-                MeasureType.Liquid
-            );
         }
     }
 }

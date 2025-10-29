@@ -33,8 +33,7 @@ namespace Products.Infrastructure.Adapters.Postgres.Migrations
                         .HasColumnName("is_archive");
 
                     b.Property<int>("measure_type_id")
-                        .HasColumnType("integer")
-                        .HasColumnName("measure_type_id");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

@@ -22,33 +22,11 @@ namespace Products.Infrastructure.Adapters.Postgres
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new MeasureTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OutboxConfiguration());
-        }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            SetMeasureTypesAsUnchanged();
-            return await base.SaveChangesAsync(cancellationToken);
-        }
-
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        {
-            SetMeasureTypesAsUnchanged();
-            return base.SaveChanges(acceptAllChangesOnSuccess);
-        }
-
-        private void SetMeasureTypesAsUnchanged()
-        {
-            var measureTypeEntries = ChangeTracker.Entries<MeasureType>()
-                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
-
-            foreach (var entry in measureTypeEntries)
-            {
-                // Проверяем, что это один из предопределенных типов
-                if (entry.Entity.Id == 1 || entry.Entity.Id == 2)
-                {
-                    entry.State = EntityState.Unchanged;
-                }
-            }
+            modelBuilder.Entity<MeasureType>(e =>
+                e.HasData(
+                    MeasureType.Weight,
+                    MeasureType.Liquid));
         }
     }
 }

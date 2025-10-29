@@ -15,9 +15,11 @@ namespace Products.Infrastructure.Adapters.Postgres.Repositories
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
-        public async Task AddAsync(Product item)
+        public async Task AddAsync(Product product)
         {
-            await _dbContext.Products.AddAsync(item);
+            if (product.MeasureType != null) _dbContext.Attach(product.MeasureType);
+
+            await _dbContext.Products.AddAsync(product);
         }
 
         public Result<bool, Error> IsDuplicate(AddProductCommand request)
@@ -50,9 +52,11 @@ namespace Products.Infrastructure.Adapters.Postgres.Repositories
             return item;
         }
 
-        public void Update(Product item)
+        public void Update(Product product)
         {
-            _dbContext.Products.Update(item);
+            if (product.MeasureType != null) _dbContext.Attach(product.MeasureType);
+
+            _dbContext.Products.Update(product);
         }
     }
 }

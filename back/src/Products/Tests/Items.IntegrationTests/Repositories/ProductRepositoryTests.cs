@@ -6,6 +6,7 @@ using Products.Infrastructure.Adapters.Postgres;
 using Products.Infrastructure.Adapters.Postgres.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
+using ItemProductss.Infrastructure.Adapters.Postgres;
 
 namespace Products.IntegrationTests.Repositories
 {
@@ -13,6 +14,7 @@ namespace Products.IntegrationTests.Repositories
     {
         private ApplicationDbContext _context;
         private ProductRepository _repository;
+        private UnitOfWork _unitOfWork;
 
         private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
             .WithImage("postgres:14.7")
@@ -36,6 +38,7 @@ namespace Products.IntegrationTests.Repositories
             _context = new ApplicationDbContext(contextOptions);
             await _context.Database.MigrateAsync();
             _repository = new ProductRepository(_context);
+            _unitOfWork = new UnitOfWork(_context);
         }
 
         public async Task DisposeAsync()
@@ -67,7 +70,7 @@ namespace Products.IntegrationTests.Repositories
         }
 
         [Fact]
-        public void CheckDuplicate_WhenDuplicateExists_ShouldReturnTrue()
+        public async Task CheckDuplicate_WhenDuplicateExists_ShouldReturnTrue()
         {
             // Arrange
             var measureType = MeasureType.Weight;
@@ -75,8 +78,8 @@ namespace Products.IntegrationTests.Repositories
 
             var existingItem = Product.Create(productName, measureType).Value;
 
-            _context.Products.Add(existingItem);
-            _context.SaveChanges();
+            await _repository.AddAsync(existingItem);
+            await _unitOfWork.SaveChangesAsync();
 
             var request = AddProductCommand.Create("Duplicate Item", MeasureType.Weight.Id).Value;
 
@@ -88,7 +91,7 @@ namespace Products.IntegrationTests.Repositories
         }
 
         [Fact]
-        public void CheckDuplicate_WhenNoDuplicate_ShouldReturnFalse()
+        public async Task CheckDuplicate_WhenNoDuplicate_ShouldReturnFalse()
         {
             // Arrange
             var measureType = MeasureType.Weight;
@@ -96,8 +99,8 @@ namespace Products.IntegrationTests.Repositories
 
             var existingItem = Product.Create(productName, measureType).Value;
 
-            _context.Products.Add(existingItem);
-            _context.SaveChanges();
+            await _repository.AddAsync(existingItem);
+            await _unitOfWork.SaveChangesAsync();
 
             var request = AddProductCommand.Create("Different Item", MeasureType.Weight.Id).Value;
 
@@ -109,7 +112,7 @@ namespace Products.IntegrationTests.Repositories
         }
 
         [Fact]
-        public void CheckDuplicate_WhenSameNameButDifferentMeasureType_ShouldReturnFalse()
+        public async Task CheckDuplicate_WhenSameNameButDifferentMeasureType_ShouldReturnFalse()
         {
             // Arrange
             var measureType1 = MeasureType.Weight;
@@ -117,8 +120,8 @@ namespace Products.IntegrationTests.Repositories
 
             var existingItem = Product.Create(productName, measureType1).Value;
 
-            _context.Products.Add(existingItem);
-            _context.SaveChanges();
+            await _repository.AddAsync(existingItem);
+            await _unitOfWork.SaveChangesAsync();
 
             var request = AddProductCommand.Create("Test Item", MeasureType.Liquid.Id).Value;
 
@@ -130,7 +133,7 @@ namespace Products.IntegrationTests.Repositories
         }
 
         [Fact]
-        public void CheckDuplicate_WhenCaseSensitiveNames_ShouldHandleCorrectly()
+        public async Task CheckDuplicate_WhenCaseSensitiveNames_ShouldHandleCorrectly()
         {
             // Arrange
             var measureType = MeasureType.Weight;
@@ -138,8 +141,8 @@ namespace Products.IntegrationTests.Repositories
 
             var existingItem = Product.Create(productName, measureType).Value;
 
-            _context.Products.Add(existingItem);
-            _context.SaveChanges();
+            await _repository.AddAsync(existingItem);
+            await _unitOfWork.SaveChangesAsync();
 
             var request = AddProductCommand.Create("test item", MeasureType.Weight.Id).Value;
 
@@ -160,19 +163,20 @@ namespace Products.IntegrationTests.Repositories
             var productName2 = ProductName.Create("Item 2").Value;
 
             var items = new List<Product>()
-    {
-        Product.Create(productName1, measureType1).Value,
-        Product.Create(productName2, measureType2).Value
-    };
+            {
+                Product.Create(productName1, measureType1).Value,
+                Product.Create(productName2, measureType2).Value
+            };
 
-            await _context.Products.AddRangeAsync(items);
-            await _context.SaveChangesAsync();
+            await _repository.AddAsync(items[0]);
+            await _repository.AddAsync(items[1]);
+            await _unitOfWork.SaveChangesAsync();
 
             // Act
             var result = await _repository.GetAllAsync();
 
             // Assert
-            Assert.NotNull(result);
+            Assert.NotNull(result.Value);
             Assert.Equal(2, result.Value.Count);
             Assert.Contains(result.Value, i => i.Name.Value == "Item 1");
             Assert.Contains(result.Value, i => i.Name.Value == "Item 2");
@@ -185,7 +189,7 @@ namespace Products.IntegrationTests.Repositories
             var result = await _repository.GetAllAsync();
 
             // Assert
-            Assert.NotNull(result);
+            Assert.NotNull(result.Value);
             Assert.Empty(result.Value);
         }
 
@@ -197,8 +201,8 @@ namespace Products.IntegrationTests.Repositories
             var productName = ProductName.Create("Test Item").Value;
 
             var item = Product.Create(productName, measureType).Value;
-            await _context.Products.AddAsync(item);
-            await _context.SaveChangesAsync();
+            await _repository.AddAsync(item);
+            await _unitOfWork.SaveChangesAsync();
 
             // Act
             var result = await _repository.GetAsync(item.Id);
@@ -234,7 +238,7 @@ namespace Products.IntegrationTests.Repositories
         }
 
         [Fact]
-        public void CheckDuplicate_WhenMeasureTypeHasSpaces_ShouldTrimAndCompare()
+        public async Task CheckDuplicate_WhenMeasureTypeHasSpaces_ShouldTrimAndCompare()
         {
             // Arrange
             var measureType = MeasureType.Weight;
@@ -242,8 +246,8 @@ namespace Products.IntegrationTests.Repositories
 
             var existingItem = Product.Create(productName, measureType).Value;
 
-            _context.Products.Add(existingItem);
-            _context.SaveChanges();
+            await _repository.AddAsync(existingItem);
+            await _unitOfWork.SaveChangesAsync();
 
             var request = AddProductCommand.Create("Test Item", MeasureType.Weight.Id).Value;
 

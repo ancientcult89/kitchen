@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Products.Core.Domain.Model.SharedKernel;
 
-namespace Products.UnitTests.Domain.Model
+namespace Products.UnitTests.Domain.Model.SharedKernelTests
 {
     public class MeasureTypeTests
     {

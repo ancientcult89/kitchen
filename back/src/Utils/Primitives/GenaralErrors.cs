@@ -23,6 +23,13 @@ public static class GeneralErrors
         return new Error("value.is.required", $"Value is required for {name}");
     }
 
+    public static Error ValueIsTooLong(int maxLenght, string name)
+    {
+        if (string.IsNullOrEmpty(name)) throw new ArgumentException(name);
+        if (maxLenght <= 0) throw new ArgumentException();
+        return new Error("value.is.too.long", $"Value is too long for {name}. Its must be {maxLenght} characters or less");
+    }
+
     public static Error ValueIsNotInRange(string name, int startRange, int endRange)
     {
         if (string.IsNullOrEmpty(name)) throw new ArgumentException(name);

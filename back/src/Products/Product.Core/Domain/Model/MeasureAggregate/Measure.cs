@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using Primitives;
+using Products.Core.Domain.Model.ProductAggregate;
 using Products.Core.Domain.Model.SharedKernel;
 
 namespace Products.Core.Domain.Model.MeasureAggregate
@@ -7,22 +8,17 @@ namespace Products.Core.Domain.Model.MeasureAggregate
     /// <summary>
     /// Единица измерения (л, кг и т.д.)
     /// </summary>
-    public class Measure : Aggregate<Guid>
+    public class Measure : ArchivableAggregate<Guid>
     {
         /// <summary>
         /// Полное наименование единицы измерения
         /// </summary>
-        public string FullName { get; private set; }
+        public MeasureFullName FullName { get; private set; }
 
         /// <summary>
         /// Краткое наименование единицы измерения
         /// </summary>
-        public string ShortName { get; private set; }
-
-        /// <summary>
-        /// Признак архивности записи
-        /// </summary>
-        public bool IsArchive { get; private set; }
+        public MeasureShortName ShortName { get; private set; }
 
         /// <summary>
         /// Способ измерения продукта (в чём мерить массу или объём если жидкость)
@@ -30,7 +26,7 @@ namespace Products.Core.Domain.Model.MeasureAggregate
         public MeasureType MeasureType { get; private set; }
 
         private Measure() { }
-        private Measure(Guid id, string fullName, string shortName, MeasureType measureType) : this()
+        private Measure(Guid id, MeasureFullName fullName, MeasureShortName shortName, MeasureType measureType) : this()
         {
             Id = id;
             FullName = fullName;
@@ -39,9 +35,18 @@ namespace Products.Core.Domain.Model.MeasureAggregate
             IsArchive = false;
         }
 
-        public static Result<Measure, Error> Create(string fullName, string shortName, MeasureType measureType)
+        public static Result<Measure, Error> Create(MeasureFullName fullName, MeasureShortName shortName, MeasureType measureType)
         {
-            throw new NotImplementedException();
+            if(fullName == null)
+                return GeneralErrors.ValueIsRequired(nameof(fullName));
+
+            if (shortName == null)
+                return GeneralErrors.ValueIsRequired(nameof(shortName));
+
+            if (measureType == null)
+                return GeneralErrors.ValueIsRequired(nameof(measureType));
+
+            return new Measure(Guid.NewGuid(), fullName, shortName, measureType);
         }
     }
 }

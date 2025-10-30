@@ -1,7 +1,7 @@
 ﻿using Primitives;
 using Products.Core.Domain.Model.ProductAggregate;
 
-namespace Products.UnitTests.Domain.Model
+namespace Products.UnitTests.Domain.Model.ProductAggregateTests
 {
     public class ProductNameTests
     {

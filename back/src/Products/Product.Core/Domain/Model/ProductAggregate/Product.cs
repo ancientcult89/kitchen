@@ -8,7 +8,7 @@ namespace Products.Core.Domain.Model.ProductAggregate
     /// <summary>
     /// Продукт
     /// </summary>
-    public class Product : Aggregate<Guid>
+    public class Product : ArchivableAggregate<Guid>
     {
         /// <summary>
         /// название продукта
@@ -19,8 +19,6 @@ namespace Products.Core.Domain.Model.ProductAggregate
         /// Способ измерения продукта (в чём мерить массу или объём если жидкость)
         /// </summary>
         public MeasureType MeasureType { get; private set; }
-
-        public bool IsArchive { get; private set; }
 
         private Product() { }
         private Product(Guid id, ProductName name, MeasureType measureType) : this()
@@ -48,25 +46,6 @@ namespace Products.Core.Domain.Model.ProductAggregate
             Guid id = Guid.NewGuid();
 
             return new Product(id, productName, measureType);
-        }
-
-        public UnitResult<Error> MakeArchive()
-        {
-            if (this.IsArchive)
-                return ProductErrors.ProductIsAlreadyArchived(this.Id);
-
-            this.IsArchive = true;
-
-            return UnitResult.Success<Error>();
-        }
-
-        public UnitResult<Error> MakeUnArchive()
-        {
-            if (!this.IsArchive)
-                return ProductErrors.ProductIsAlreadyUnArchived(this.Id);
-
-            this.IsArchive = false;
-            return UnitResult.Success<Error>();
         }
     }
 }
